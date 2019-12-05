@@ -58,7 +58,7 @@ Loop:
 		case Halt:
 			break Loop
 		default:
-			return errors.New(fmt.Sprintf("unsupported opcode %d", opcode))
+			return fmt.Errorf("unsupported opcode %d", opcode)
 		}
 		ip += 4
 	}
