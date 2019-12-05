@@ -10,46 +10,57 @@ import (
 	"strconv"
 )
 
+// Intcode opcodes
 const (
 	Add  = 1  // Add is the addition opcode.
 	Mult = 2  // Mult is the multiplication opcode.
 	Halt = 99 // Halt terminate the program.
 )
 
-// Intcode is a gravity assist program composed by integers.
+// Intcode memory indices
+const (
+	Output = 0    // Output is the index of the program result in memory.
+	Noun   = iota // Noun is the value placed in adress 1
+	Verb   = iota // Noun is the value placed in adress 2
+)
+
+// Intcode represent the memory state of an Intcode computer.
 type Intcode []int
 
-// Alarm restore the program to the "1202 program alarm" state it had just
-// before the last computer caught fire.
-func (program Intcode) Alarm() {
-	program[1] = 12
-	program[2] = 2
+// Copy return an copy of the program.
+func (prog Intcode) Copy() Intcode {
+	clone := make(Intcode, len(prog))
+	copy(clone, prog)
+	return clone
+}
+
+// Setup prepare the program for execution by setting its Noun and Verb
+// indices.
+func (prog Intcode) Setup(noun, verb int) {
+	prog[Noun] = noun
+	prog[Verb] = verb
 }
 
 // Execute run the Intcode gravity assist program.
 // It returns an error if an unexpected opcode is encountered.
-func (program Intcode) Execute() error {
-	position := 0
+func (prog Intcode) Execute() error {
+	ip := 0 // instruction pointer
 Loop:
 	for {
-		opcode := program[position]
+		opcode := prog[ip]
 		switch opcode {
 		case Add:
-			lpos := program[position+1]
-			rpos := program[position+2]
-			dest := program[position+3]
-			program[dest] = program[lpos] + program[rpos]
+			lpos, rpos, dest := prog[ip+1], prog[ip+2], prog[ip+3]
+			prog[dest] = prog[lpos] + prog[rpos]
 		case Mult:
-			lpos := program[position+1]
-			rpos := program[position+2]
-			dest := program[position+3]
-			program[dest] = program[lpos] * program[rpos]
+			lpos, rpos, dest := prog[ip+1], prog[ip+2], prog[ip+3]
+			prog[dest] = prog[lpos] * prog[rpos]
 		case Halt:
 			break Loop
 		default:
 			return errors.New(fmt.Sprintf("unsupported opcode %d", opcode))
 		}
-		position += 4
+		ip += 4
 	}
 	return nil
 }
@@ -57,24 +68,46 @@ Loop:
 // main execute the Intcode program given on stdin and output The value left at
 // position 0 after the program halts.
 func main() {
-	program, err := Parse(os.Stdin)
+	// parse the puzzle input, i.e. the initial state of the Intcode program.
+	initial, err := Parse(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
 	}
-	program.Alarm()
-	if err = program.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "intcode error: %s\n", err)
-		os.Exit(1)
+
+	// execute each possible noun and verb combination in its own goroutine
+	// using a couple of channel so that programs finding an interesting output
+	// can be collected.
+	alarm, landing := make(chan Intcode, 1), make(chan Intcode, 1)
+	for noun := 0; noun < 100; noun++ {
+		for verb := 0; verb < 100; verb++ {
+			go func(noun, verb int) { // capture noun and verb
+				prog := initial.Copy()
+				prog.Setup(noun, verb)
+				err := prog.Execute()
+				switch {
+				case err != nil:
+					// we crashed the program. Maybe that's because of this
+					// noun and verb combination, so we ignore it.
+				case noun == 12 && verb == 2:
+					alarm <- prog // 1202 program alarm
+				case prog[Output] == 19690720:
+					landing <- prog // Moon landing by Appollo 11
+				}
+			}(noun, verb)
+		}
 	}
-	fmt.Printf("The value left at position 0 after the program halts is %d.\n", program[0])
+	fst, snd := <-alarm, <-landing
+
+	fmt.Printf("The value left at position 0 after the program halts is %d,\n", fst[Output])
+	fmt.Printf("and when the output is 19690720: 100 * noun + verb = %d.\n", 100*snd[Noun]+snd[Verb])
 }
 
 // Parse an Intcode program.
-// It returns the parsed Intcode program and any read of convertion error
-// encountered.
+// It returns the parsed Intcode program's initial memory and any read of
+// convertion error encountered.
 func Parse(r io.Reader) (Intcode, error) {
-	var program Intcode
+	var prog Intcode
 	scanner := bufio.NewScanner(r)
 	scanner.Split(ScanIntcodes)
 	for scanner.Scan() {
@@ -82,12 +115,12 @@ func Parse(r io.Reader) (Intcode, error) {
 		if err != nil {
 			return nil, err
 		}
-		program = append(program, ic)
+		prog = append(prog, ic)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	return program, nil
+	return prog, nil
 }
 
 // ScanIntcodes is a split function for Scanner.
