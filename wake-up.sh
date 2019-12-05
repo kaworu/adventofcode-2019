@@ -62,14 +62,15 @@ import (
 func main() {
 	lines, err := parse(os.Stdin)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
+		os.Exit(1)
 	}
 	fmt.Print(lines)
 }
 
 // TODO
 func parse(r io.Reader) ([]string, error) {
-	lines = make([]string, 0)
+	var lines []string
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())

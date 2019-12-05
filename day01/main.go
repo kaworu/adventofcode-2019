@@ -8,16 +8,19 @@ import (
 	"strconv"
 )
 
-// The weight of something.
+// Mass is the weight of something.
 type Mass int
 
-// Returns the amount of fuel required to carry the given mass.
+// FuelRequired compute the amount of fuel required to carry the given mass. //
+// It returns the Mass of the fuel required.
 func FuelRequired(m Mass) Mass {
 	return m/3 - 2
 }
 
-// Return the amount of fuel required to launch all the given modules, along
-// with the amount of fuel required for the fuel.
+// TotalFuelRequired compute the amount of fuel required to launch all the
+// given modules.
+// It returns the total Mass of fuel required for the modules and the Mass of
+// fuel required for the fuel.
 func TotalFuelRequired(modules ...Mass) (mf, ff Mass) {
 	for _, module := range modules {
 		fuel := FuelRequired(module)
@@ -31,21 +34,24 @@ func TotalFuelRequired(modules ...Mass) (mf, ff Mass) {
 	return
 }
 
-// Compute and display the sum of the fuel requirements for all of the modules
-// given on stdin.
+// main compute and display the sum of the fuel requirements for all of the
+// modules given on stdin.
 func main() {
-	modules, err := parse(os.Stdin)
+	modules, err := Parse(os.Stdin)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
+		os.Exit(1)
 	}
 	mf, ff := TotalFuelRequired(modules...)
 	fmt.Printf("The sum of the fuel requirements is %d,\n", mf)
 	fmt.Printf("and when also taking into account the mass of the added fuel it is %d.\n", mf+ff)
 }
 
-// Parse one module per line of input.
-func parse(r io.Reader) ([]Mass, error) {
-	modules := make([]Mass, 0)
+// Parse read the given input to produce a slice of Mass.
+// It returns the parsed collection of Mass and any read of convertion error
+// encountered.
+func Parse(r io.Reader) ([]Mass, error) {
+	var modules []Mass
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
