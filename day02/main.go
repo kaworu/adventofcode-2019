@@ -21,7 +21,7 @@ const (
 const (
 	Output = 0    // Output is the index of the program result in memory.
 	Noun   = iota // Noun is the value placed in adress 1
-	Verb   = iota // Noun is the value placed in adress 2
+	Verb   = iota // Verb is the value placed in adress 2
 )
 
 // Intcode represent the memory state of an Intcode computer.
@@ -65,7 +65,7 @@ Loop:
 	return nil
 }
 
-// main execute the Intcode program given on stdin and output The value left at
+// main execute the Intcode program given on stdin and output the value left at
 // position 0 after the program halts.
 func main() {
 	// parse the puzzle input, i.e. the initial state of the Intcode program.
