@@ -9,7 +9,7 @@ import (
 )
 
 // Mass is the weight of something.
-type Mass int
+type Mass int64
 
 // FuelRequired compute the amount of fuel required to carry the given mass. //
 // It returns the Mass of the fuel required.

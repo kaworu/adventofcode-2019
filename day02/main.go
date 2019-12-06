@@ -23,37 +23,39 @@ const (
 	Verb   = iota // Verb is the value placed in adress 2.
 )
 
-// Intcode represent the memory state of an Intcode computer.
-type Intcode []int
+type (
+	Intcode int64     // Intcode is a value in the computer's memory.
+	Memory  []Intcode // Memory represent the state of an Intcode computer.
+)
 
 // Copy return an copy of the program.
-func (prog Intcode) Copy() Intcode {
-	clone := make(Intcode, len(prog))
-	copy(clone, prog)
+func (mem Memory) Copy() Memory {
+	clone := make(Memory, len(mem))
+	copy(clone, mem)
 	return clone
 }
 
 // Setup prepare the program for execution by setting its Noun and Verb
 // indices.
-func (prog Intcode) Setup(noun, verb int) {
-	prog[Noun] = noun
-	prog[Verb] = verb
+func (mem Memory) Setup(noun, verb Intcode) {
+	mem[Noun] = noun
+	mem[Verb] = verb
 }
 
 // Execute run the Intcode gravity assist program.
 // It returns an error if an unexpected opcode is encountered.
-func (prog Intcode) Execute() error {
+func (mem Memory) Execute() error {
 	ip := 0 // instruction pointer
 Loop:
 	for {
-		opcode := prog[ip]
+		opcode := mem[ip]
 		switch opcode {
 		case Add:
-			lpos, rpos, dest := prog[ip+1], prog[ip+2], prog[ip+3]
-			prog[dest] = prog[lpos] + prog[rpos]
+			lpos, rpos, dest := mem[ip+1], mem[ip+2], mem[ip+3]
+			mem[dest] = mem[lpos] + mem[rpos]
 		case Mult:
-			lpos, rpos, dest := prog[ip+1], prog[ip+2], prog[ip+3]
-			prog[dest] = prog[lpos] * prog[rpos]
+			lpos, rpos, dest := mem[ip+1], mem[ip+2], mem[ip+3]
+			mem[dest] = mem[lpos] * mem[rpos]
 		case Halt:
 			break Loop
 		default:
@@ -77,23 +79,23 @@ func main() {
 	// execute each possible noun and verb combination in its own goroutine
 	// using a couple of channel so that programs finding an interesting output
 	// can be collected.
-	alarm, landing := make(chan Intcode, 1), make(chan Intcode, 1)
+	alarm, landing := make(chan Memory, 1), make(chan Memory, 1)
 	for noun := 0; noun < 100; noun++ {
 		for verb := 0; verb < 100; verb++ {
-			go func(noun, verb int) { // capture noun and verb
-				prog := initial.Copy()
-				prog.Setup(noun, verb)
-				err := prog.Execute()
+			go func(noun, verb Intcode) { // capture noun and verb
+				mem := initial.Copy()
+				mem.Setup(noun, verb)
+				err := mem.Execute()
 				switch {
 				case err != nil:
 					// we crashed the program. Maybe that's because of this
 					// noun and verb combination, so we ignore it.
 				case noun == 12 && verb == 2:
-					alarm <- prog // 1202 program alarm
-				case prog[Output] == 19690720:
-					landing <- prog // Moon landing by Appollo 11
+					alarm <- mem // 1202 program alarm
+				case mem[Output] == 19690720:
+					landing <- mem // Moon landing by Appollo 11
 				}
-			}(noun, verb)
+			}(Intcode(noun), Intcode(verb))
 		}
 	}
 	fst, snd := <-alarm, <-landing
@@ -105,8 +107,8 @@ func main() {
 // Parse an Intcode program.
 // It returns the parsed Intcode program's initial memory and any read of
 // convertion error encountered.
-func Parse(r io.Reader) (Intcode, error) {
-	var prog Intcode
+func Parse(r io.Reader) (Memory, error) {
+	var mem Memory
 	scanner := bufio.NewScanner(r)
 	scanner.Split(ScanIntcodes)
 	for scanner.Scan() {
@@ -114,12 +116,12 @@ func Parse(r io.Reader) (Intcode, error) {
 		if err != nil {
 			return nil, err
 		}
-		prog = append(prog, ic)
+		mem = append(mem, Intcode(ic))
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	return prog, nil
+	return mem, nil
 }
 
 // ScanIntcodes is a split function for Scanner.
