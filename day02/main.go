@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -20,8 +19,8 @@ const (
 // Intcode memory indices
 const (
 	Output = 0    // Output is the index of the program result in memory.
-	Noun   = iota // Noun is the value placed in adress 1
-	Verb   = iota // Verb is the value placed in adress 2
+	Noun   = iota // Noun is the value placed in adress 1.
+	Verb   = iota // Verb is the value placed in adress 2.
 )
 
 // Intcode represent the memory state of an Intcode computer.
