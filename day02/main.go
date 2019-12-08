@@ -23,10 +23,11 @@ const (
 	Verb   = iota // Verb is the value placed in adress 2.
 )
 
-type (
-	Intcode int64     // Intcode is a value in the computer's memory.
-	Memory  []Intcode // Memory represent the state of an Intcode computer.
-)
+// Intcode is a value in the computer's memory.
+type Intcode int64
+
+// Memory represent the state of an Intcode computer.
+type Memory []Intcode
 
 // Copy return an copy of the program.
 func (mem Memory) Copy() Memory {
@@ -105,7 +106,7 @@ func main() {
 }
 
 // Parse an Intcode program.
-// It returns the parsed Intcode program's initial memory and any read of
+// It returns the parsed Intcode program's initial memory and any read or
 // convertion error encountered.
 func Parse(r io.Reader) (Memory, error) {
 	var mem Memory
