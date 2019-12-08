@@ -33,13 +33,13 @@ type Grid map[Point]uint64
 
 // Step represent a path component.
 type Step struct {
-	Direction byte   // Direction is either Up, Right, Down or Left.
-	Count     uint64 // Count is the step's number of port.
+	Direction byte // Direction is either Up, Right, Down or Left.
+	Count     int  // Count is the step's number of port.
 }
 
-// Wire represent a circuit wire connected to a central port on the grid.
-type Wire struct {
-	ID    uint64 // ID is the wire identifier, either FstWireID or SndWireId.
+// Path represent a circuit wire connection to a central port on the grid.
+type Path struct {
+	ID    uint64 // ID is the wire identifier.
 	Steps []Step /// Steps is the path description of the wire in the grid.
 }
 
@@ -79,13 +79,13 @@ func (grid Grid) CentralPort() Point {
 	return Point{x: 0, y: 0}
 }
 
-// Connect place a given wire into the grid.
+// Connect place a given wire path into the grid.
 // It returns the points where the wire has crossed another already connected
 // wire, in the order encountered.
-func (grid Grid) Connect(wire Wire) []Point {
+func (grid Grid) Connect(path Path) []Point {
 	var intersections []Point
 	p := grid.CentralPort()
-	for _, step := range wire.Steps {
+	for _, step := range path.Steps {
 		var delta Point
 		switch step.Direction {
 		case Up:
@@ -97,10 +97,10 @@ func (grid Grid) Connect(wire Wire) []Point {
 		case Left:
 			delta.x = -1
 		}
-		for i := 0; uint64(i) < step.Count; i++ {
+		for i := 0; i < step.Count; i++ {
 			p = p.Add(delta)
-			grid[p] |= wire.ID
-			if grid[p] != wire.ID {
+			grid[p] |= path.ID
+			if grid[p] != path.ID {
 				intersections = append(intersections, p)
 			}
 		}
@@ -123,30 +123,30 @@ func main() {
 	fmt.Printf("The Manhattan distance fron the central port to the closest intersection is %d.\n", distance)
 }
 
-// Parse a couple of wires.
-// It returns the parsed wires and any read or parsing error encountered.
-func Parse(r io.Reader) ([]Wire, error) {
-	var wires []Wire
+// Parse a couple of wire paths.
+// It returns the parsed paths and any read or parsing error encountered.
+func Parse(r io.Reader) ([]Path, error) {
+	var paths []Path
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		var wire Wire
+		var path Path
 		line := scanner.Text()
 		for _, part := range strings.Split(line, ",") {
 			step, err := parseStep(part)
 			if err != nil {
 				return nil, err
 			}
-			wire.Steps = append(wire.Steps, step)
+			path.Steps = append(path.Steps, step)
 		}
-		wires = append(wires, wire)
+		paths = append(paths, path)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	for i := range wires {
-		wires[i].ID = 1 << i
+	for i := range paths {
+		paths[i].ID = 1 << i
 	}
-	return wires, nil
+	return paths, nil
 }
 
 // parseStep is a parsing helper for Parse.
@@ -181,7 +181,7 @@ func parseStep(s string) (Step, error) {
 	if i < 0 {
 		return step, fmt.Errorf("negative step count")
 	}
-	step.Count = uint64(i)
+	step.Count = i
 
 	return step, nil
 }
