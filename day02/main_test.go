@@ -9,29 +9,49 @@ func TestExecute(t *testing.T) {
 		Expected Memory
 	}{
 		{
-			"detailed example",
-			Memory{1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50},
-			Memory{3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50},
+			Name: "detailed example",
+			Program: Memory{
+				1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50,
+			},
+			Expected: Memory{
+				3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50,
+			},
 		},
 		{
-			"first example",
-			Memory{1, 0, 0, 0, 99},
-			Memory{2, 0, 0, 0, 99},
+			Name: "first example",
+			Program: Memory{
+				1, 0, 0, 0, 99,
+			},
+			Expected: Memory{
+				2, 0, 0, 0, 99,
+			},
 		},
 		{
-			"second example",
-			Memory{2, 3, 0, 3, 99},
-			Memory{2, 3, 0, 6, 99},
+			Name: "second example",
+			Program: Memory{
+				2, 3, 0, 3, 99,
+			},
+			Expected: Memory{
+				2, 3, 0, 6, 99,
+			},
 		},
 		{
-			"third example",
-			Memory{2, 4, 4, 5, 99, 0},
-			Memory{2, 4, 4, 5, 99, 9801},
+			Name: "third example",
+			Program: Memory{
+				2, 4, 4, 5, 99, 0,
+			},
+			Expected: Memory{
+				2, 4, 4, 5, 99, 9801,
+			},
 		},
 		{
-			"fourth example",
-			Memory{1, 1, 1, 4, 99, 5, 6, 0, 99},
-			Memory{30, 1, 1, 4, 2, 5, 6, 0, 99},
+			Name: "fourth example",
+			Program: Memory{
+				1, 1, 1, 4, 99, 5, 6, 0, 99,
+			},
+			Expected: Memory{
+				30, 1, 1, 4, 2, 5, 6, 0, 99,
+			},
 		},
 	}
 

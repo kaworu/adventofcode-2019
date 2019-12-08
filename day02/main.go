@@ -56,10 +56,14 @@ Loop:
 		opcode := mem[ip]
 		switch opcode {
 		case Add:
-			lpos, rpos, dest := mem[ip+1], mem[ip+2], mem[ip+3]
+			lpos := mem[ip+1]
+			rpos := mem[ip+2]
+			dest := mem[ip+3]
 			mem[dest] = mem[lpos] + mem[rpos]
 		case Mult:
-			lpos, rpos, dest := mem[ip+1], mem[ip+2], mem[ip+3]
+			lpos := mem[ip+1]
+			rpos := mem[ip+2]
+			dest := mem[ip+3]
 			mem[dest] = mem[lpos] * mem[rpos]
 		case Halt:
 			break Loop
@@ -84,7 +88,8 @@ func main() {
 	// execute each possible noun and verb combination in its own goroutine
 	// using a couple of channel so that programs finding an interesting output
 	// can be collected.
-	alarm, landing := make(chan Memory, 1), make(chan Memory, 1)
+	alarm := make(chan Memory, 1)
+	landing := make(chan Memory, 1)
 	for noun := 0; noun < 100; noun++ {
 		for verb := 0; verb < 100; verb++ {
 			go func(noun, verb Intcode) { // capture noun and verb
@@ -103,7 +108,8 @@ func main() {
 			}(Intcode(noun), Intcode(verb))
 		}
 	}
-	fst, snd := <-alarm, <-landing
+	fst := <-alarm
+	snd := <-landing
 
 	fmt.Printf("The value left at position 0 after the program halts is %d,\n", fst[Output])
 	fmt.Printf("and when the output is 19690720: 100 * noun + verb = %d.\n", 100*snd[Noun]+snd[Verb])
