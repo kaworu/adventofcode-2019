@@ -9,18 +9,22 @@ import (
 	"strconv"
 )
 
-// Intcode opcodes
 const (
-	Add  = 1  // Add is the addition opcode.
-	Mult = 2  // Mult is the multiplication opcode.
-	Halt = 99 // Halt terminate the program.
+	// Add is the addition opcode.
+	Add = 1
+	// Mult is the multiplication opcode.
+	Mult = 2
+	// Halt terminate the program.
+	Halt = 99
 )
 
-// Intcode memory indices
 const (
-	Output = 0    // Output is the index of the program result in memory.
-	Noun   = iota // Noun is the value placed in adress 1.
-	Verb   = iota // Verb is the value placed in adress 2.
+	// Output is the index of the program result in memory.
+	Output = 0
+	// Noun is the value placed in adress 1.
+	Noun = iota
+	// Verb is the value placed in adress 2.
+	Verb = iota
 )
 
 // Intcode is a value in the computer's memory.
