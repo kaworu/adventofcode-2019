@@ -37,9 +37,10 @@ type Point struct {
 
 // Segment are straight connections between two points.
 type Segment struct {
-	From, To               Point
-	xmin, ymin, xmax, ymax int64
-	steps                  int64
+	From, To   Point
+	xmin, xmax int64
+	ymin, ymax int64
+	steps      int64
 }
 
 // Wire represent a wire connected into the grid from the central port.
@@ -211,12 +212,9 @@ func parseStep(s string) (Step, error) {
 	}
 
 	// parse the step count
-	i, err := strconv.Atoi(s[1:])
+	i, err := strconv.ParseUint(s[1:], 10, 63) // 63 bit size fit in int64
 	if err != nil {
 		return step, err
-	}
-	if i < 0 {
-		return step, fmt.Errorf("negative step count")
 	}
 	step.Count = int64(i)
 

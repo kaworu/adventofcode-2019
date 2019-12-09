@@ -123,7 +123,7 @@ func Parse(r io.Reader) (Memory, error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(ScanIntcodes)
 	for scanner.Scan() {
-		ic, err := strconv.Atoi(scanner.Text())
+		ic, err := strconv.ParseInt(scanner.Text(), 10, 64)
 		if err != nil {
 			return nil, err
 		}

@@ -55,7 +55,7 @@ func Parse(r io.Reader) ([]Mass, error) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
-		i, err := strconv.Atoi(line)
+		i, err := strconv.ParseUint(line, 10, 63) // 63 bit size fit in int64
 		if err != nil {
 			return nil, err
 		}
