@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -21,26 +20,36 @@ const (
 	Left = iota
 )
 
+// Step represent a path component.
+type Step struct {
+	Direction byte  // Direction is either Up, Right, Down or Left.
+	Count     int64 // Count is the step's number of port.
+}
+
+// Path represent a circuit wire connection description.
+type Path []Step
+
 // Point represent a position in the grid.
-// y grows Up, x grows Right.
+// y grows Up, x grows Right, the zero value is the central port.
 type Point struct {
 	x, y int64
 }
 
-// Grid is where the wires are connected.
-// The values are the count of wire at the given point.
-type Grid map[Point]uint64
-
-// Step represent a path component.
-type Step struct {
-	Direction byte // Direction is either Up, Right, Down or Left.
-	Count     int  // Count is the step's number of port.
+// Segment are straight connections between two points.
+type Segment struct {
+	From, To               Point
+	xmin, ymin, xmax, ymax int64
+	steps                  int64
 }
 
-// Path represent a circuit wire connection to a central port on the grid.
-type Path struct {
-	ID    uint64 // ID is the wire identifier.
-	Steps []Step /// Steps is the path description of the wire in the grid.
+// Wire represent a wire connected into the grid from the central port.
+type Wire []Segment
+
+// CentralPort returns the point in the grid where from where all wire
+// connections begins.
+func CentralPort() Point {
+	// By convention, the central port is the Point zero value.
+	return Point{x: 0, y: 0}
 }
 
 // Add returns p + other.
@@ -53,74 +62,105 @@ func (p Point) Distance(other Point) int64 {
 	return abs(p.x-other.x) + abs(p.y-other.y)
 }
 
-// Closest find the point in the given slice having the least distance from p.
-// It return the point found and its distance relative to p. If the slice is
-// empty, the returned point is undefined and distance is -1.
-func (p Point) Closest(others []Point) (Point, int64) {
-	var c Point                  // closest point
-	var cd int64 = math.MaxInt64 // closest distance
-	if len(others) == 0 {
-		return c, -1
+// NewSegment create a new Segment given the starting and ending points.
+func NewSegment(from, to Point) Segment {
+	seg := Segment{From: from, To: to}
+	if from.x < to.x {
+		seg.xmin, seg.xmax = from.x, to.x
+	} else {
+		seg.xmin, seg.xmax = to.x, from.x
 	}
-	for _, other := range others {
-		d := p.Distance(other)
-		if d < cd {
-			cd = d
-			c = other
-		}
+	if from.y < to.y {
+		seg.ymin, seg.ymax = from.y, to.y
+	} else {
+		seg.ymin, seg.ymax = to.y, from.y
 	}
-	return c, cd
+	seg.steps = from.Distance(to)
+	return seg
 }
 
-// CentralPort returns the point in the grid where from where all wire
-// connections begins.
-func (grid Grid) CentralPort() Point {
-	// The central port is the Point zero value for any Grid (by convention).
-	return Point{x: 0, y: 0}
+// IntersectWith check if the other Segment and seg share a point. If they do,
+// the intersection point and true is returned. Otherwise the central port and
+// false is returned.
+func (seg Segment) IntersectWith(other Segment) (Point, bool) {
+	switch {
+	case seg.xmin <= other.xmin && seg.xmax >= other.xmin &&
+		seg.ymin <= other.ymax && seg.ymin >= other.ymin:
+		return Point{x: other.xmin, y: seg.ymin}, true
+	case other.xmin <= seg.xmin && other.xmax >= seg.xmin &&
+		other.ymin <= seg.ymax && other.ymin >= seg.ymin:
+		return Point{x: seg.xmin, y: other.ymin}, true
+	}
+	return Point{}, false
 }
 
-// Connect place a given wire path into the grid.
-// It returns the points where the wire has crossed another already connected
-// wire, in the order encountered.
-func (grid Grid) Connect(path Path) []Point {
-	var intersections []Point
-	p := grid.CentralPort()
-	for _, step := range path.Steps {
-		var delta Point
+// NewWire place a given wire path into the grid and return the resulting Wire.
+func NewWire(path Path) Wire {
+	var wire Wire
+	start := CentralPort() // the current position, starting at the central port.
+	for _, step := range path {
+		stop := start
 		switch step.Direction {
 		case Up:
-			delta.y = 1
+			stop.y += step.Count
 		case Right:
-			delta.x = 1
+			stop.x += step.Count
 		case Down:
-			delta.y = -1
+			stop.y -= step.Count
 		case Left:
-			delta.x = -1
+			stop.x -= step.Count
 		}
-		for i := 0; i < step.Count; i++ {
-			p = p.Add(delta)
-			grid[p] |= path.ID
-			if grid[p] != path.ID {
-				intersections = append(intersections, p)
-			}
-		}
+		wire = append(wire, NewSegment(start, stop))
+		start = stop
 	}
-	return intersections
+	return wire
+}
+
+// Connect link a couple of wire on the grid. It returns the the Manhattan
+// distance from the central port to the closest intersection (md) and the
+// fewest combined steps the wires must take to reach an intersection (ms).
+func Connect(a, b Wire) (md, ms int64) {
+	md = -1
+	ms = -1
+	cp := CentralPort()
+	var astep int64 = 0
+	for _, aseg := range a {
+		var bstep int64 = 0
+		for _, bseg := range b {
+			// we omit the intersection at the central port, hence p != cp.
+			if p, ok := aseg.IntersectWith(bseg); ok && p != cp {
+				// min distance
+				d := cp.Distance(p)
+				if md == -1 || d < md {
+					md = d
+				}
+				// min combined step
+				s := astep + aseg.From.Distance(p) +
+					bstep + bseg.From.Distance(p)
+				if ms == -1 || s < ms {
+					ms = s
+				}
+			}
+			bstep += bseg.steps
+		}
+		astep += aseg.steps
+	}
+	return
 }
 
 // main compute and display the Manhattan distance from the central port to the
 // closest intersection of the wires description given on stdin.
 func main() {
-	grid := make(Grid)
-	wires, err := Parse(os.Stdin)
+	paths, err := Parse(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
 	}
-	grid.Connect(wires[0])
-	intersections := grid.Connect(wires[1])
-	_, distance := grid.CentralPort().Closest(intersections)
-	fmt.Printf("The Manhattan distance fron the central port to the closest intersection is %d.\n", distance)
+	fst := NewWire(paths[0])
+	snd := NewWire(paths[1])
+	md, ms := Connect(fst, snd)
+	fmt.Printf("The Manhattan distance fron the central port to the closest intersection is %v,\n", md)
+	fmt.Printf("and the fewest combined steps the wires must take to reach an intersection is %v.\n", ms)
 }
 
 // Parse a couple of wire paths.
@@ -136,15 +176,12 @@ func Parse(r io.Reader) ([]Path, error) {
 			if err != nil {
 				return nil, err
 			}
-			path.Steps = append(path.Steps, step)
+			path = append(path, step)
 		}
 		paths = append(paths, path)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
-	}
-	for i := range paths {
-		paths[i].ID = 1 << i
 	}
 	return paths, nil
 }
@@ -181,7 +218,7 @@ func parseStep(s string) (Step, error) {
 	if i < 0 {
 		return step, fmt.Errorf("negative step count")
 	}
-	step.Count = i
+	step.Count = int64(i)
 
 	return step, nil
 }
