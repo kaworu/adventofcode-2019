@@ -20,11 +20,11 @@ const (
 
 const (
 	// Output is the index of the program result in memory.
-	Output = 0
+	Output = iota
 	// Noun is the value placed in adress 1.
-	Noun = iota
+	Noun
 	// Verb is the value placed in adress 2.
-	Verb = iota
+	Verb
 )
 
 // Intcode is a value in the computer's memory.
@@ -51,7 +51,6 @@ func (mem Memory) Setup(noun, verb Intcode) {
 // It returns an error if an unexpected opcode is encountered.
 func (mem Memory) Execute() error {
 	ip := 0 // instruction pointer
-Loop:
 	for {
 		opcode := mem[ip]
 		switch opcode {
@@ -66,13 +65,12 @@ Loop:
 			dest := mem[ip+3]
 			mem[dest] = mem[lpos] * mem[rpos]
 		case Halt:
-			break Loop
+			return nil
 		default:
 			return fmt.Errorf("unsupported opcode %d", opcode)
 		}
 		ip += 4
 	}
-	return nil
 }
 
 // main execute the Intcode program given on stdin and output the value left at

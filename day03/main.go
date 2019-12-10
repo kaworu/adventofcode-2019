@@ -11,13 +11,13 @@ import (
 
 const (
 	// Up is the north direction in the grid.
-	Up = 0
+	Up = iota
 	// Right is the east direction in the grid.
-	Right = iota
+	Right
 	// Down is the south direction in the grid.
-	Down = iota
+	Down
 	// Left is the west direction in the grid.
-	Left = iota
+	Left
 )
 
 // Step represent a path component.
