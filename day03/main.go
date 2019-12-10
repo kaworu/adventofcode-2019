@@ -44,7 +44,7 @@ type Segment struct {
 }
 
 // Wire represent a wire connected into the grid from the central port.
-type Wire []Segment
+type Wire []*Segment
 
 // CentralPort returns the point in the grid where from where all wire
 // connections begins.
@@ -64,8 +64,8 @@ func (p Point) Distance(other Point) int64 {
 }
 
 // NewSegment create a new Segment given the starting and ending points.
-func NewSegment(from, to Point) Segment {
-	seg := Segment{From: from, To: to}
+func NewSegment(from, to Point) *Segment {
+	seg := &Segment{From: from, To: to}
 	if from.x < to.x {
 		seg.xmin, seg.xmax = from.x, to.x
 	} else {
@@ -81,9 +81,9 @@ func NewSegment(from, to Point) Segment {
 }
 
 // IntersectWith check if the other Segment and seg share a point. If they do,
-// the intersection point and true is returned. Otherwise the central port and
-// false is returned.
-func (seg Segment) IntersectWith(other Segment) (Point, bool) {
+// the intersection point and true is returned. Otherwise the Point zero value
+// and false is returned.
+func (seg *Segment) IntersectWith(other *Segment) (Point, bool) {
 	switch {
 	case seg.xmin <= other.xmin && seg.xmax >= other.xmin &&
 		seg.ymin <= other.ymax && seg.ymin >= other.ymin:
