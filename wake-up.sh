@@ -60,7 +60,7 @@ import (
 
 // TODO
 func main() {
-	lines, err := parse(os.Stdin)
+	lines, err := Parse(os.Stdin)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
@@ -69,7 +69,7 @@ func main() {
 }
 
 // TODO
-func parse(r io.Reader) ([]string, error) {
+func Parse(r io.Reader) ([]string, error) {
 	var lines []string
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
