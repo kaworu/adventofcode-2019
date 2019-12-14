@@ -9,15 +9,18 @@ import (
 	"strings"
 )
 
-// Digits6 represent number composed of six digits.
+// Digits6 represent number composed of six digits. By definition, a Digits6
+// always satisfy the first criterion.
 // NOTE: Digits6 are stored least significant digit first.
 type Digits6 [6]uint8
 
-// Password are six digits number obeying all the criteria to be a valid
-// password according to the Elves key facts.
+// Password are six digits number satisfying the fourth criterion, i.e. going
+// from the highest digit to the lowest the digits never decrease.
 type Password struct {
 	Digits6
-	ri int // adjacent digits index such as Digits6[ri] == Digits6[ri - 1]
+	// ri is the highest digits index satisfying Digits6[ri] == Digits6[ri-1].
+	// When there are no equal adjacent digits then ri == 0.
+	ri int
 }
 
 // Bounds represent the range given in the puzzle input.
@@ -52,49 +55,38 @@ func (ds *Digits6) CompareTo(es *Digits6) int {
 }
 
 // NewPassword create a Password from a lower bound Digits6 number.
-// Since Password obey all the criteria and the given lower bound min may not,
-// the returned Password is the minimum Digits6 value that satisfy
-// password.CompareTo(min) >= 0. In other words, the returned Password Digits6
-// is the closest valid Password greater than or equals to min.
+// Since Password must satisfy the fourth criterion and the given lower bound
+// min may not, the returned Password is the minimum valid value satisfying
+// climb.CompareTo(min) >= 0. In other words, the returned Password is the
+// closest valid Password greater than or equals to min.
 func NewPassword(min *Digits6) *Password {
 	p := &Password{}
 	// copy min over p.Digits6 in a way that satisfy the fourth rule, i.e.
 	// going from the highest significant digit to the lowest the digit never
 	// decrease.
 	p.Digits6[len(p.Digits6)-1] = min[len(min)-1]
-	for i := len(p.Digits6) - 1; i > 0; i-- {
-		if min[i-1] < min[i] {
-			p.Digits6[i-1] = min[i]
+	for i := len(p.Digits6) - 2; i >= 0; i-- {
+		if min[i] < min[i+1] {
+			p.Digits6[i] = min[i+1]
 		} else {
-			p.Digits6[i-1] = min[i-1]
+			p.Digits6[i] = min[i]
 		}
-		if i > p.ri && p.Digits6[i] == p.Digits6[i-1] {
-			// We found two equals adjacent digits, keep track of them in ri.
-			p.ri = i
+		// When we find two equal adjacent digits, keep track of them in ri.
+		if p.ri == 0 && p.Digits6[i] == p.Digits6[i+1] {
+			p.ri = i + 1
 		}
-	}
-	if p.ri == 0 {
-		// Here p.Digits6 doesn't satisfy the two equals adjacent digits. We
-		// have p.Digits6[0] > p.Digits6[1] because they never decrease (by
-		// construction) and they can't be equals (otherwise we would have
-		// ri = 1). Thus, setting p.Digits6[0] = p.Digits6[1] will set p to the
-		// closest valid Password below the one we are looking for. From there
-		// we Inc()rease the password to find the target.
-		p.Digits6[0] = p.Digits6[1]
-		p.ri = 1
-		p.Inc()
 	}
 	return p
 }
 
 // Inc set the Password to the next valid Password, i.e. the smallest Password
-// satisfying all the criteria greater than the current Password.  If p is
-// exactly the maximum Digits6 value (i.e. 999999), then Inc will wrap p around
-// and set it to 000000.
+// satisfying the fourth criterion greater than the current Password.
+// NOTE: When p is the maximum Digits6 value (i.e. 999999), then Inc will wrap
+// p around set it to 000000.
 func (p *Password) Inc() {
 	// Find the digit to increase. Note that an incrementing loop is used here
 	// instead of range so that 999999 will set i = len(p.Digits6).
-	var hi uint8 // the digit value we increased to
+	var hi uint8 // the digit value increased to
 	var i int
 	for i = 0; i < len(p.Digits6); i++ {
 		if p.Digits6[i] < 9 {
@@ -104,44 +96,68 @@ func (p *Password) Inc() {
 		}
 	}
 
-	// Now i is the index of the digit increased, and hi hold its value. We can
+	// Now i is the index of the digit increased and hi hold its value. We can
 	// set all the least significant digits than i to hi to satisfy the fourth
-	// rule. Note that when p == 999999 then i = len(p.Digits6) and hi = 0,
-	// effectively wrapping around and setting p.Digits6 to 000000.
+	// criterion. Note that when p == 999999 then i = len(p.Digits6) and
+	// hi = 0, effectively wrapping around and setting p.Digits6 to 000000.
 	for j := 0; j < i; j++ {
 		p.Digits6[j] = hi
 	}
 
-	// From here p.Digits6 has been increased according to the fourth rule. We
-	// still need to enforce the third rule, i.e. two equals adjacent digits.
+	// From here p.Digits6 has been increased according to the fourth
+	// criterion. We do some equal adjacent digits bookkeeping to ease password
+	// detection.
 
 	// Set i to be the index of the highest digit changed.
 	if i == len(p.Digits6) {
 		i--
 	}
 
-	// If we changed at least the first digit from the previously two equals
-	// adjacent digits we need to check for the third rule.
+	// When we changed one value from the previously two equal adjacent digits
+	// we need to update ri. Note that ri == 0, i.e. there was not double
+	// previously, will follow the same codepath.
 	if i >= p.ri-1 {
 		switch {
 		// check if we ith digit was increased to exactly the same value as
 		// (i+1)th digit.
 		case i+1 < len(p.Digits6) && p.Digits6[i] == p.Digits6[i+1]:
 			p.ri = i + 1
-		// If more than one digit was changed, we know we have
-		// p.Digits6[i] == p.Digits6[i-1] == hi. Thus, i is the highest digit
-		// index of the two equals adjacent digits.
-		case i > 0:
+		// Here we have either i == 0 or p.Digits6[i] == p.Digits6[i-1] == hi.
+		// Thus, i is the highest digit index of the two equals adjacent digits
+		// (or zero if there is no double).
+		default:
 			p.ri = i
-		default: // i == 0
-			// Here we only increased the least significant digit and it
-			// doesn't match p.Digits6[1] (otherwise we would have fallen into
-			// the first case. We're not a valid Password and so we need to
-			// Inc()rease more.
-			p.Inc()
-			return
 		}
 	}
+}
+
+// HasRepeatingDigits returns true when p has at least two equal adjacent
+// digits, false otherwise.
+func (p *Password) HasRepeatingDigits() bool {
+	return p.ri > 0
+}
+
+// HasDouble returns true when p has two equal adjacent digits that are not
+// part of a larger group, false otherwise.
+func (p *Password) HasDouble() bool {
+	// value of the highest repeating digit.
+	v := p.Digits6[p.ri]
+	// when p.ri > 0 then we already have two equal adjacent digits.
+	n := 2
+	for i := p.ri - 2; i >= 0; i-- {
+		switch {
+		case p.Digits6[i] == v: // same number as the previous.
+			n++
+		case n == 2: // different from the previous and we just seen a double.
+			return true
+		default: // "reset" the double counter
+			v = p.Digits6[i]
+			n = 1
+		}
+	}
+	// From here, our last chance to satisfy the rule is to have the two least
+	// significant digits forming a double.
+	return n == 2 && p.Digits6[0] == p.Digits6[1]
 }
 
 // Compute and display the count of Password within the range given on stdin.
@@ -151,11 +167,18 @@ func main() {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
 	}
-	n := 0
+	v1 := 0 // count of version 1 passwords, satisfying HasRepeatingDigits()
+	v2 := 0 // count of version 2 passwords, satisfying HasDouble()
 	for p := NewPassword(&bounds.Min); p.CompareTo(&bounds.Max) <= 0; p.Inc() {
-		n++
+		if p.HasRepeatingDigits() {
+			v1++
+		}
+		if p.HasDouble() {
+			v2++
+		}
 	}
-	fmt.Printf("There %d different passwords.\n", n)
+	fmt.Printf("There are %d different passwords with repeating digits,\n", v1)
+	fmt.Printf("And %d different passwords with double not part of a larger group.\n", v2)
 }
 
 // Parse a bound description formatted as "min-max".
