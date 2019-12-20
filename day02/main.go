@@ -35,9 +35,9 @@ type Memory []Intcode
 
 // Copy return an copy of the program.
 func (mem Memory) Copy() Memory {
-	clone := make(Memory, len(mem))
-	copy(clone, mem)
-	return clone
+	cpy := make(Memory, len(mem))
+	copy(cpy, mem)
+	return cpy
 }
 
 // Setup prepare the program for execution by setting its Noun and Verb
@@ -50,26 +50,26 @@ func (mem Memory) Setup(noun, verb Intcode) {
 // Execute run the Intcode gravity assist program.
 // It returns an error if an unexpected opcode is encountered.
 func (mem Memory) Execute() error {
-	ip := 0 // instruction pointer
+	var pc int64 = 0 // instruction pointer
 	for {
-		opcode := mem[ip]
+		opcode := mem[pc]
 		switch opcode {
 		case Add:
-			lpos := mem[ip+1]
-			rpos := mem[ip+2]
-			dest := mem[ip+3]
+			lpos := mem[pc+1]
+			rpos := mem[pc+2]
+			dest := mem[pc+3]
 			mem[dest] = mem[lpos] + mem[rpos]
 		case Mult:
-			lpos := mem[ip+1]
-			rpos := mem[ip+2]
-			dest := mem[ip+3]
+			lpos := mem[pc+1]
+			rpos := mem[pc+2]
+			dest := mem[pc+3]
 			mem[dest] = mem[lpos] * mem[rpos]
 		case Halt:
 			return nil
 		default:
 			return fmt.Errorf("unsupported opcode %d", opcode)
 		}
-		ip += 4
+		pc += 4
 	}
 }
 
