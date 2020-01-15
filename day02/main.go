@@ -75,6 +75,7 @@ func (mem Memory) Execute() error {
 
 // main execute the Intcode program given on stdin and output the value left at
 // position 0 after the program halts.
+// TODO: use pkg Context (see https://blog.golang.org/context)
 func main() {
 	// parse the puzzle input, i.e. the initial state of the Intcode program.
 	initial, err := Parse(os.Stdin)
