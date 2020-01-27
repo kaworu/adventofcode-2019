@@ -22,7 +22,7 @@ type Body struct {
 type UniversalOrbitMap map[string]*Body
 
 // OrbitCount compute and return the Center Of Mass's total of direct and
-// indirect orbits.
+// indirect orbits. When the map has no Center Of Mass, (-1, -1) is returned.
 func (uom UniversalOrbitMap) OrbitCount() (direct, indirect int) {
 	if com, ok := uom["COM"]; ok {
 		direct, indirect = com.OrbitCount(0)
