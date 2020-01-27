@@ -21,23 +21,26 @@ type Body struct {
 // UniversalOrbitMap maps bodies names to their entry in the tree.
 type UniversalOrbitMap map[string]*Body
 
-// OrbitCount compute and return the Center Of Mass's total of direct and
-// indirect orbits. When the map has no Center Of Mass, (-1, -1) is returned.
-func (uom UniversalOrbitMap) OrbitCount() (direct, indirect int) {
-	if com, ok := uom["COM"]; ok {
-		direct, indirect = com.OrbitCount(0)
-	} else {
-		direct, indirect = -1, -1
+// IsCenterOfMass returns true when b is the Center of Mass, false otherwise.
+func (b *Body) IsCenterOfMass() bool {
+	// When b doesn't orbit another body, then it is the Center of Mass.
+	return b.orbits == nil
+}
+
+// Depth returns the distance between b and the Center of Mass.
+func (b *Body) Depth() int {
+	d := 0
+	for c := b; !c.IsCenterOfMass(); c = c.orbits {
+		d++
 	}
-	return
+	return d
 }
 
 // OrbitCount compute and return the b's total of direct and indirect orbits.
 // The depth argument is the distance between b and the Center of Mass.
 func (b *Body) OrbitCount(depth int) (direct, indirect int) {
-	// we have a direct orbit iff we're orbiting around another Body, i.e. when
-	// we're not the COM.
-	if b.orbits != nil {
+	// we have a direct orbit iff we're not the COM.
+	if !b.IsCenterOfMass() {
 		direct = 1
 		indirect = depth - 1
 	}
@@ -54,33 +57,48 @@ func (b *Body) OrbitCount(depth int) (direct, indirect int) {
 
 // OrbitalTransfers compute and returns the minimum of orbital transfers
 // required to move from the object b is orbiting to the object o is orbiting.
-// It returns -1 when b and o are not part of the same UniversalOrbitMap.
+// It returns -1 when either b or o is the Center of Mass, or when they are not
+// part of the same UniversalOrbitMap.
 func (b *Body) OrbitalTransfers(o *Body) int {
-	bnode, onode := b, o
-	bdist, odist := 0, 0
-	bpath, opath := make(map[*Body]int), make(map[*Body]int)
-	// find the Least Common Ancestor (LCA) between o and b.
-	for bnode != nil || onode != nil {
-		if bnode != nil {
-			bnode = bnode.orbits
-			if n, ok := opath[bnode]; ok {
-				return n + bdist
-			}
-			bpath[bnode] = bdist
-			bdist += 1
-		}
-		if onode != nil {
-			onode = onode.orbits
-			if n, ok := bpath[onode]; ok {
-				return n + odist
-			}
-			opath[onode] = odist
-			odist += 1
-		}
+	if b.IsCenterOfMass() || o.IsCenterOfMass() {
+		return -1
 	}
 
-	// No LCA, could happen when b and o don't belong in the same tree.
+	// let n0, n1 be the objects b (respectively o) is orbiting.
+	n0, n1 := b.orbits, o.orbits
+	// let n0 be the deepest node.
+	d0, d1 := n0.Depth(), n1.Depth()
+	diff := d0 - d1
+	if diff < 0 {
+		n0, n1 = n1, n0
+		diff = -diff
+	}
+
+	// Bring n0 "up" to the same level as n1.
+	for i := 0; i < diff; i++ {
+		n0 = n0.orbits
+	}
+
+	// Travel "up" from both sides until we get a match.
+	for i := 0; n0 != nil && n1 != nil; i++ {
+		if n0 == n1 {
+			return i*2 + diff
+		}
+		n0, n1 = n0.orbits, n1.orbits
+	}
+
 	return -1
+}
+
+// OrbitCount compute and return the Center of Mass's total of direct and
+// indirect orbits. When the map has no Center of Mass, (-1, -1) is returned.
+func (uom UniversalOrbitMap) OrbitCount() (direct, indirect int) {
+	if com, ok := uom["COM"]; ok {
+		direct, indirect = com.OrbitCount(0)
+	} else {
+		direct, indirect = -1, -1
+	}
+	return
 }
 
 // main parse the universal orbit map, then compute and display the total of
