@@ -35,7 +35,7 @@ func (uom UniversalOrbitMap) OrbitCount() (direct, indirect int) {
 // OrbitCount compute and return the b's total of direct and indirect orbits.
 // The depth argument is the distance between b and the Center of Mass.
 func (b *Body) OrbitCount(depth int) (direct, indirect int) {
-	// we have a direct orbit iff we're orbiting around another Body, i.e. if
+	// we have a direct orbit iff we're orbiting around another Body, i.e. when
 	// we're not the COM.
 	if b.orbits != nil {
 		direct = 1
@@ -52,6 +52,37 @@ func (b *Body) OrbitCount(depth int) (direct, indirect int) {
 	return
 }
 
+// OrbitalTransfers compute and returns the minimum of orbital transfers
+// required to move from the object b is orbiting to the object o is orbiting.
+// It returns -1 when b and o are not part of the same UniversalOrbitMap.
+func (b *Body) OrbitalTransfers(o *Body) int {
+	bnode, onode := b, o
+	bdist, odist := 0, 0
+	bpath, opath := make(map[*Body]int), make(map[*Body]int)
+	// find the Least Common Ancestor (LCA) between o and b.
+	for bnode != nil || onode != nil {
+		if bnode != nil {
+			bnode = bnode.orbits
+			if n, ok := opath[bnode]; ok {
+				return n + bdist
+			}
+			bpath[bnode] = bdist
+			bdist += 1
+		}
+		if onode != nil {
+			onode = onode.orbits
+			if n, ok := bpath[onode]; ok {
+				return n + odist
+			}
+			opath[onode] = odist
+			odist += 1
+		}
+	}
+
+	// No LCA, could happen when b and o don't belong in the same tree.
+	return -1
+}
+
 // main parse the universal orbit map, then compute and display the total of
 // direct and indirect orbits.
 func main() {
@@ -60,8 +91,20 @@ func main() {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
 	}
+	you, ok := uom["YOU"]
+	if !ok {
+		fmt.Fprint(os.Stderr, "YOU not found\n")
+		os.Exit(1)
+	}
+	san, ok := uom["SAN"]
+	if !ok {
+		fmt.Fprint(os.Stderr, "SAN not found\n")
+		os.Exit(1)
+	}
 	direct, indirect := uom.OrbitCount()
-	fmt.Printf("the total number of direct and indirect orbits is %v.\n", direct+indirect)
+	distance := you.OrbitalTransfers(san)
+	fmt.Printf("the total number of direct and indirect orbits is %v,\n", direct+indirect)
+	fmt.Printf("and the minimum of orbital transfers required is %v.\n", distance)
 }
 
 // Parse a map of the local orbits.
