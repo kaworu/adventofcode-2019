@@ -47,7 +47,7 @@ type (
 	Memory []Intcode
 	// Input is the slice from where the Read instruction will get its data.
 	Input []Intcode
-	// Output is the slice where the Write will append its data.
+	// Output is the slice where the Write instruction will append its data.
 	Output []Intcode
 )
 
