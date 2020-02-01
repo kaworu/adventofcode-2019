@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"sync"
 )
 
 const (
@@ -53,6 +54,11 @@ type (
 	}
 )
 
+// mod returns i modulo n.
+func mod(i, n int) int {
+	return ((i % n) + n) % n
+}
+
 // Permutations returns all permutations of the given set.
 func Permutations(set []Intcode) [][]Intcode {
 	// https://en.wikipedia.org/wiki/Heap%27s_algorithm
@@ -79,7 +85,11 @@ func Permutations(set []Intcode) [][]Intcode {
 			}
 		}
 	}
-	generate(len(set), set)
+	// work on a local copy so that set is unmodified after this function
+	// returns.
+	cpy := make([]Intcode, len(set))
+	copy(cpy, set)
+	generate(len(cpy), cpy)
 	return all
 }
 
@@ -164,42 +174,61 @@ func (amp *Amplifier) Execute() error {
 	}
 }
 
-// Series run the provided Amplifier Controller Software on a series of
-// Amplifier configured according to the given phase setting sequence.
+// FeedbackLoop run the provided Amplifier Controller Software on a feedback
+// loop of Amplifiers configured according to the given phase setting sequence.
 // It returns the last Amplifier's output.
-func Series(apc Memory, seq []Intcode) Intcode {
-	amps := make([]Amplifier, len(seq))
+func FeedbackLoop(apc Memory, seq []Intcode) Intcode {
+	n := len(seq)
+	amps := make([]Amplifier, n)
+	// Setup the feedback loop. i.e. each Amplifier to have its input being the
+	// previous Amplifier output. The channels are all setup such that the
+	// phase setting is provided first. The first Amplifier input is a special
+	// case where we have to additionally setup the initial input value zero.
 	for i := range amps {
-		amps[i].Memory = apc.Copy()
-		input := make(chan Intcode, 2)
-		input <- seq[i] // phase setting setup
-		amps[i].Input = input
+		c := make(chan Intcode, 2)
+		c <- seq[i] // phase setting
 		if i == 0 {
-			input <- 0
-		} else {
-			amps[i-1].Output = input
+			c <- 0
 		}
+		prev := mod(i-1, n)
+		amps[i].Memory = apc.Copy()
+		amps[i].Input = c
+		amps[prev].Output = c
 	}
-	out := make(chan Intcode)
-	amps[len(amps)-1].Output = out
+	// Run each Amplifier in a goroutine and wait for all of them to halt.
+	// Note that part one require to setup the Amplifiers in series (not in a
+	// feedback loop). We blindly trust the Amplifier Controller Software to
+	// halt after receiving exactly one input (i.e. without looping) for part
+	// one (i.e. when the phase settings are between zero and four inclusive).
+	var wg sync.WaitGroup
+	wg.Add(n)
 	for i := range amps {
-		go amps[i].Execute() // FIXME: error are ignored
+		i := i // capture i
+		go func() {
+			defer wg.Done()
+			amps[i].Execute() // FIXME: error are ignored
+		}()
 	}
-	return <-out
+	wg.Wait()
+	// The first Amplifier input channel is the last Amplifier output channel.
+	return <-amps[0].Input
 }
 
 // HighestSignal run each possible phase setting sequences permutations in
-// series of Amplifier to find signals that can be sent to the thruster.
+// a feedback loop of Amplifiers to find signals that can be sent to the
+// thruster.
 // It return the highest signal.
 func HighestSignal(apc Memory, phases []Intcode) Intcode {
 	sequences := Permutations(phases)
 	signals := make(chan Intcode, len(sequences))
 	for _, seq := range sequences {
-		go func(seq []Intcode) {
-			signals <- Series(apc, seq)
-		}(seq)
+		seq := seq // capture seq
+		go func() {
+			signals <- FeedbackLoop(apc, seq)
+		}()
 	}
-
+	// Read every output values in order to find the greatest one to be
+	// returned.
 	var max Intcode
 	for i := 0; i < len(sequences); i++ {
 		x := <-signals
@@ -211,8 +240,8 @@ func HighestSignal(apc Memory, phases []Intcode) Intcode {
 }
 
 // Main parse the Amplifier Controller Software Intcode program, and then run
-// each possible phase setting sequences permutations in series of Amplifier to
-// find the highest signal that can be sent to the thruster.
+// each possible phase setting sequences permutations in a feedback loop of
+// Amplifiers to find the highest signal that can be sent to the thruster.
 func main() {
 	// parse the puzzle input, i.e. the Amplifier Controller Software Intcode
 	// program.
@@ -221,8 +250,14 @@ func main() {
 		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
 		os.Exit(1)
 	}
-	max := HighestSignal(mem, []Intcode{0, 1, 2, 3, 4})
-	fmt.Printf("The highest signal that can be sent to the thrusters is %v.\n", max)
+	// part one - in series
+	ps := []Intcode{0, 1, 2, 3, 4} // phase settings
+	max := HighestSignal(mem, ps)
+	fmt.Printf("The highest signal that can be sent to the thrusters using the phase settings %v is %v.\n", ps, max)
+	// part two - feedback loop
+	ps = []Intcode{5, 6, 7, 8, 9}
+	max = HighestSignal(mem, ps)
+	fmt.Printf("The highest signal that can be sent to the thrusters using the phase settings %v is %v.\n", ps, max)
 }
 
 // Parse an Intcode program.
