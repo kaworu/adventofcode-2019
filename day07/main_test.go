@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+	"time"
+)
 
 var tests = []struct {
 	Name     string
@@ -29,6 +33,7 @@ var tests = []struct {
 }
 
 func TestSeries(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
 			output := Series(tc.Program, tc.Sequence)
@@ -40,12 +45,22 @@ func TestSeries(t *testing.T) {
 }
 
 func TestHighestSignal(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
-			output := HighestSignal(tc.Program, []Intcode{0, 1, 2, 3, 4})
+			output := HighestSignal(tc.Program, Shuffled(tc.Sequence))
 			if output != tc.Expected {
 				t.Errorf("expected %v as output, got %v", tc.Expected, output)
 			}
 		})
 	}
+}
+
+// Shuffled return a copy of the given slice with its element in a random
+// order. Note that rand.Seed() must has been called before this function.
+func Shuffled(xs []Intcode) []Intcode {
+	ys := make([]Intcode, len(xs))
+	copy(ys, xs)
+	rand.Shuffle(len(xs), func(i, j int) { ys[i], ys[j] = ys[j], ys[i] })
+	return ys
 }
