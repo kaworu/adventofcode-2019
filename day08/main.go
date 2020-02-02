@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	// Black is a dark Pixel
-	Black = iota
-	// White is a bright Pixel
-	White
-	// Trans is a transparent Pixel
-	Trans
+	// Black is a dark Pixel.
+	Black = 0
+	// White is a bright Pixel.
+	White = 1
+	// Trans is a transparent Pixel.
+	Trans = 2
 )
 
 // Pixel are the basic elements of a Layer.

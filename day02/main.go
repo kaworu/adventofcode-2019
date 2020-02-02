@@ -20,11 +20,11 @@ const (
 
 const (
 	// Output is the index of the program result in memory.
-	Output = iota
+	Output = 0
 	// Noun is the value placed in adress 1.
-	Noun
+	Noun = 1
 	// Verb is the value placed in adress 2.
-	Verb
+	Verb = 2
 )
 
 // Intcode is a value in the computer's memory.
