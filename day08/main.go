@@ -2,10 +2,20 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
+)
+
+const (
+	// Black is a dark Pixel
+	Black = iota
+	// White is a bright Pixel
+	White
+	// Trans is a transparent Pixel
+	Trans
 )
 
 // Pixel are the basic elements of a Layer.
@@ -27,15 +37,28 @@ func NewLayer(width int, height int, pixels []Pixel) (*Layer, error) {
 	return &Layer{width, height, pixels}, nil
 }
 
-// Count returns the number of pixels matching ref in the Layer.
-func (l *Layer) Count(ref Pixel) int {
-	n := 0
-	for _, p := range l.pixels {
-		if p == ref {
-			n++
+// Flatten take a stack of layer and combine them from the top (first) to the
+// bottom (last). It return the combined Layer.
+func Flatten(layers []*Layer) *Layer {
+	if len(layers) == 0 {
+		return nil
+	}
+	width, height := layers[0].width, layers[0].height
+	pixels := make([]Pixel, width*height)
+	flat := &Layer{width, height, pixels}
+	// Black being the zero-value for Pixel, we start with an all-black Layer
+	// here. Since we never check for Pixel values in flat it is not an issue.
+	for i := range flat.pixels {
+	layersLoop:
+		for _, l := range layers {
+			switch p := l.pixels[i]; p {
+			case Black, White:
+				flat.pixels[i] = p
+				break layersLoop
+			}
 		}
 	}
-	return n
+	return flat
 }
 
 // MinLayerBy returns the first Layer l that evaluate to the minimum value
@@ -54,6 +77,40 @@ func MinLayerBy(all []*Layer, f func(*Layer) int) *Layer {
 	return min
 }
 
+// Count returns the number of pixels matching ref in the Layer.
+func (l Layer) Count(ref Pixel) int {
+	n := 0
+	for _, p := range l.pixels {
+		if p == ref {
+			n++
+		}
+	}
+	return n
+}
+
+// String implement fmt Stringer interface for Layer.
+func (l Layer) String() string {
+	var buf bytes.Buffer
+	for y := 0; y < l.height; y++ {
+		for x := 0; x < l.width; x++ {
+			switch p := l.pixels[y*l.width+x]; p {
+			// We use UTF-8 'BLACK' for white and conversely assuming output to
+			// a something-on-black terminal because that is what I use.
+			case Black:
+				buf.WriteString("⬜") // 'WHITE LARGE SQUARE' (U+2B1C)
+			case White:
+				buf.WriteString("⬛") // 'BLACK LARGE SQUARE' (U+2B1B)
+			case Trans:
+				buf.WriteString("  ")
+			default:
+				buf.WriteString("??")
+			}
+		}
+		buf.WriteString("\n")
+	}
+	return buf.String()
+}
+
 // main parse the puzzle provided on stdin and then compute the number of 1
 // digits multiplied by the number of 2 digits from the layer having the fewest
 // 0 digits.
@@ -69,6 +126,8 @@ func main() {
 	})
 	one, two := l.Count(1), l.Count(2)
 	fmt.Printf("The number of 1 digits multiplied by the number of 2 digits is %v * %v = %v.\n", one, two, one*two)
+	flat := Flatten(layers)
+	fmt.Printf("The message after decoding the image is:\n\n%v\n", flat)
 }
 
 // Parse the Space Image Format into its pixels layers.
