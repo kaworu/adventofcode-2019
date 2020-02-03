@@ -268,7 +268,18 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unexpected output from the BOOST program: %v.\n", output)
 		os.Exit(1)
 	}
-	fmt.Printf("The BOOST keycode is %v.\n", output[0])
+	fmt.Printf("The BOOST keycode is %v,\n", output[0])
+
+	output, err = c.Execute(boost, Input{2})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "execution error: %s\n", err)
+		os.Exit(1)
+	}
+	if len(output) != 1 {
+		fmt.Fprintf(os.Stderr, "unexpected output from the BOOST program: %v.\n", output)
+		os.Exit(1)
+	}
+	fmt.Printf("and the coordinates of the distress signal are %v.\n", output[0])
 }
 
 // Parse an Intcode program.
