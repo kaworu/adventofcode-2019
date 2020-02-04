@@ -105,12 +105,10 @@ func (l Layer) String() string {
 	for y := 0; y < l.height; y++ {
 		for x := 0; x < l.width; x++ {
 			switch p := l.pixels[y*l.width+x]; p {
-			// We use UTF-8 'BLACK' for white and conversely assuming output to
-			// a something-on-black terminal.
 			case Black:
-				buf.WriteString("⬜") // 'WHITE LARGE SQUARE' (U+2B1C)
-			case White:
 				buf.WriteString("⬛") // 'BLACK LARGE SQUARE' (U+2B1B)
+			case White:
+				buf.WriteString("⬜") // 'WHITE LARGE SQUARE' (U+2B1C)
 			case Trans:
 				buf.WriteString("  ")
 			default:
