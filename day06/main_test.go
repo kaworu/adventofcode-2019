@@ -28,10 +28,10 @@ K)L
 	}
 	direct, indirect := uom.OrbitCount()
 	if direct != expected.direct {
-		t.Errorf("expected %v direct orbits, got %v", expected.direct, direct)
+		t.Errorf("got %v direct orbits; expected %v", direct, expected.direct)
 	}
 	if indirect != expected.indirect {
-		t.Errorf("expected %v indirect orbits, got %v", expected.indirect, indirect)
+		t.Errorf("got %v inddirect orbits; expected %v", indirect, expected.indirect)
 	}
 }
 
@@ -65,6 +65,6 @@ I)SAN
 		t.Fatalf("Parsing error: SAN can not be found")
 	}
 	if n := you.OrbitalTransfers(san); n != expected {
-		t.Errorf("expected %v orbital transfers, got %v", expected, n)
+		t.Errorf("got %v orbital transfers; expected %v", n, expected)
 	}
 }

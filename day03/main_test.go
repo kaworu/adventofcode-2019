@@ -93,14 +93,14 @@ func TestParse(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			paths, err := Parse(strings.NewReader(tc.Input))
 			if err != nil {
-				t.Errorf("Unexpected error: %s", err)
+				t.Errorf("Parse() error: %s", err)
 			}
-			if lp, le := len(paths), len(tc.Expected); lp != le {
-				t.Errorf("expected %d wire paths, got %d", le, lp)
+			if len(paths) != len(tc.Expected) {
+				t.Errorf("len(paths) = %d; expected %d", len(paths), len(tc.Expected))
 			}
 			for i := range paths {
 				if !PathEqual(paths[i], tc.Expected[i]) {
-					t.Errorf("expected %v, got %v", tc.Expected[i], paths[i])
+					t.Errorf("paths[%d] = %v; expected %v", i, paths[i], tc.Expected[i])
 				}
 			}
 		})
@@ -138,19 +138,19 @@ func TestClosest(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			paths, err := Parse(strings.NewReader(tc.Input))
 			if err != nil {
-				t.Errorf("Unexpected error: %s", err)
+				t.Errorf("Parse() error: %s", err)
 			}
 			if len(paths) != 2 {
-				t.Errorf("Expected 2 wires, got %d", len(paths))
+				t.Errorf("got %d wires; expected 2", len(paths))
 			}
 			fst := NewWire(paths[0])
 			snd := NewWire(paths[1])
 			md, ms := Connect(fst, snd)
 			if md != tc.ExpectedDistance {
-				t.Errorf("expected distance of %d, got %v", tc.ExpectedDistance, md)
+				t.Errorf("distance = %d; expected %d", md, tc.ExpectedDistance)
 			}
 			if ms != tc.ExpectedSteps {
-				t.Errorf("expected %v steps, got %v", tc.ExpectedSteps, ms)
+				t.Errorf("steps = %d; expected %d", ms, tc.ExpectedSteps)
 			}
 		})
 	}

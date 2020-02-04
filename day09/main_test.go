@@ -35,9 +35,9 @@ func TestExecute(t *testing.T) {
 			output, err := c.Execute(tc.Program, tc.Input)
 			switch {
 			case err != nil:
-				t.Errorf("Unexpected execute error: %s", err)
+				t.Errorf("Execute(%v, %v) error: %s", tc.Program, tc.Input, err)
 			case !IntcodeEqual(output, tc.Expected):
-				t.Errorf("expected %v as output, got %v", tc.Expected, output)
+				t.Errorf("Execute(%v, %v) = %v; expected %v", tc.Program, tc.Input, output, tc.Expected)
 			}
 		})
 	}

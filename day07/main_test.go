@@ -50,7 +50,7 @@ func TestFeedbackLoop(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			output := FeedbackLoop(tc.Program, tc.Sequence)
 			if output != tc.Expected {
-				t.Errorf("expected %v as output, got %v", tc.Expected, output)
+				t.Errorf("output = %v; expected %v", output, tc.Expected)
 			}
 		})
 	}
@@ -62,7 +62,7 @@ func TestHighestSignal(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			output := HighestSignal(tc.Program, Shuffled(tc.Sequence))
 			if output != tc.Expected {
-				t.Errorf("expected %v as output, got %v", tc.Expected, output)
+				t.Errorf("output = %v; expected %v", output, tc.Expected)
 			}
 		})
 	}

@@ -57,11 +57,12 @@ func TestExecute(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
-			if err := tc.Program.Execute(); err != nil {
-				t.Errorf("Unexpected error: %s", err)
+			mem := tc.Program.Copy()
+			if err := mem.Execute(); err != nil {
+				t.Errorf("%v.Execute() error: %s", tc.Program, err)
 			}
-			if !Equal(tc.Program, tc.Expected) {
-				t.Errorf("got %v, expected %v", tc.Program, tc.Expected)
+			if !Equal(mem, tc.Expected) {
+				t.Errorf("%v.Execute() = %v; expected %v", tc.Program, mem, tc.Expected)
 			}
 		})
 	}

@@ -8,7 +8,7 @@ func TestFuelRequired(t *testing.T) {
 	tests := []struct {
 		Name string
 		Mass
-		Fuel Mass
+		Expected Mass
 	}{
 		{"first example", 12, 2},
 		{"second example", 14, 2},
@@ -20,8 +20,8 @@ func TestFuelRequired(t *testing.T) {
 		tc := tc // capture range variable
 		t.Run(tc.Name, func(t *testing.T) {
 			t.Parallel()
-			if r := FuelRequired(tc.Mass); r != tc.Fuel {
-				t.Errorf("%v.FuelRequired() = %d, expected %d", tc.Mass, r, tc.Fuel)
+			if r := FuelRequired(tc.Mass); r != tc.Expected {
+				t.Errorf("FuelRequired(%d) = %d; expected %d", tc.Mass, r, tc.Expected)
 			}
 		})
 	}
@@ -33,7 +33,7 @@ func TestTotalFuelRequired(t *testing.T) {
 	tests := []struct {
 		Name string
 		Mass
-		Fuel Mass
+		Expected Mass
 	}{
 		{"first example", 14, 2},
 		{"second example", 1969, 966},
@@ -45,8 +45,8 @@ func TestTotalFuelRequired(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			t.Parallel()
 			mf, ff := TotalFuelRequired(tc.Mass)
-			if r := mf + ff; r != tc.Fuel {
-				t.Errorf("TotalFuelRequired(%v) = %d, expected %d", tc.Mass, r, tc.Fuel)
+			if r := mf + ff; r != tc.Expected {
+				t.Errorf("TotalFuelRequired(%v) = %d; expected %d", tc.Mass, r, tc.Expected)
 			}
 		})
 	}

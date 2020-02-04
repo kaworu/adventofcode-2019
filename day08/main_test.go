@@ -5,39 +5,34 @@ import (
 	"testing"
 )
 
+var encoded = "0222112222120000"
+var layers = []*Layer{
+	&Layer{2, 2, []Pixel{0, 2, 2, 2}},
+	&Layer{2, 2, []Pixel{1, 1, 2, 2}},
+	&Layer{2, 2, []Pixel{2, 2, 1, 2}},
+	&Layer{2, 2, []Pixel{0, 0, 0, 0}},
+}
+
 func TestParse(t *testing.T) {
-	encoded := "0222112222120000"
-	expected := []*Layer{
-		&Layer{2, 2, []Pixel{0, 2, 2, 2}},
-		&Layer{2, 2, []Pixel{1, 1, 2, 2}},
-		&Layer{2, 2, []Pixel{2, 2, 1, 2}},
-		&Layer{2, 2, []Pixel{0, 0, 0, 0}},
-	}
 	decoded, err := Parse(2, 2, strings.NewReader(encoded))
 	if err != nil {
-		t.Errorf("parsing failed: %s", err)
-	} else if len(expected) != len(decoded) {
-		t.Errorf("expected %d layers, got %d instead", len(expected), len(decoded))
+		t.Errorf("Parse(%v) error: %s", encoded, err)
+	} else if len(decoded) != len(layers) {
+		t.Errorf("got %d layers; expected %d", len(decoded), len(layers))
 	} else {
-		for i := range expected {
-			if !LayerEquals(expected[i], decoded[i]) {
-				t.Errorf("expected %v for layer %d but got %v", expected[i], i, decoded[i])
+		for i := range layers {
+			if !LayerEquals(decoded[i], layers[i]) {
+				t.Errorf("layers[%d] = %v; expected %v", i, decoded[i], layers[i])
 			}
 		}
 	}
 }
 
 func TestFlatten(t *testing.T) {
-	layers := []*Layer{
-		&Layer{2, 2, []Pixel{0, 2, 2, 2}},
-		&Layer{2, 2, []Pixel{1, 1, 2, 2}},
-		&Layer{2, 2, []Pixel{2, 2, 1, 2}},
-		&Layer{2, 2, []Pixel{0, 0, 0, 0}},
-	}
 	expected := &Layer{2, 2, []Pixel{0, 1, 1, 0}}
 	flat := Flatten(layers)
-	if !LayerEquals(expected, flat) {
-		t.Errorf("expected %v but got %v", expected, flat)
+	if !LayerEquals(flat, expected) {
+		t.Errorf("Flatten(%v) = %v; expected = %v", encoded, flat, expected)
 	}
 }
 

@@ -23,9 +23,9 @@ func TestInputOutput(t *testing.T) {
 			output, err := mem.Execute(tc.Input)
 			switch {
 			case err != nil:
-				t.Errorf("Unexpected execute error: %s", err)
+				t.Errorf("%v.Execute(%v) error", tc.Program, tc.Input)
 			case !IntcodeEqual(output, tc.Expected):
-				t.Errorf("expected %v as output, got %v", tc.Expected, output)
+				t.Errorf("%v.Execute(%v) = %v; expected %v", tc.Program, tc.Input, output, tc.Expected)
 			}
 		})
 	}
@@ -55,9 +55,9 @@ func TestModes(t *testing.T) {
 			_, err := mem.Execute( /* Input */ nil)
 			switch {
 			case err != nil:
-				t.Errorf("Unexpected execute error: %s", err)
+				t.Errorf("%v.Execute() error", tc.Program)
 			case !IntcodeEqual(mem, tc.FinalState):
-				t.Errorf("expected %v as final state, got %v", tc.FinalState, mem)
+				t.Errorf("%v.Execute() final state = %v; expected %v", tc.Program, mem, tc.FinalState)
 			}
 		})
 	}
@@ -112,10 +112,10 @@ func TestComparisons(t *testing.T) {
 				output, err := mem.Execute(in)
 				switch {
 				case err != nil:
-					t.Errorf("input %d: Unexpected execute error: %s", i, err)
+					t.Errorf("%v.Execute(%v) error: %s", tc.Program, in, err)
 					return
 				case !IntcodeEqual(output, expected):
-					t.Errorf("input %d: expected %v as output, got %v", i, expected, output)
+					t.Errorf("%v.Execute(%v) = %v; expected %v", tc.Program, in, output, expected)
 					return
 				}
 			}
