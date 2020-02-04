@@ -68,7 +68,7 @@ type Computer struct {
 }
 
 // expand the Computer's memory with zero values up to i. Once it returns, it
-// is guaranteed that c.mem[i] will not be out of memory bounds.
+// is guaranteed that c.mem[i] will not be out of bounds.
 func (c *Computer) expand(i int) {
 	if i >= len(c.mem) {
 		s := nextPow2(i + 1) // the new memory size
