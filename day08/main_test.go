@@ -6,11 +6,11 @@ import (
 )
 
 var encoded = "0222112222120000"
-var layers = []*Layer{
-	&Layer{2, 2, []Pixel{0, 2, 2, 2}},
-	&Layer{2, 2, []Pixel{1, 1, 2, 2}},
-	&Layer{2, 2, []Pixel{2, 2, 1, 2}},
-	&Layer{2, 2, []Pixel{0, 0, 0, 0}},
+var layers = []Layer{
+	Layer{2, 2, []Pixel{0, 2, 2, 2}},
+	Layer{2, 2, []Pixel{1, 1, 2, 2}},
+	Layer{2, 2, []Pixel{2, 2, 1, 2}},
+	Layer{2, 2, []Pixel{0, 0, 0, 0}},
 }
 
 func TestParse(t *testing.T) {
@@ -29,16 +29,18 @@ func TestParse(t *testing.T) {
 }
 
 func TestFlatten(t *testing.T) {
-	expected := &Layer{2, 2, []Pixel{0, 1, 1, 0}}
-	flat := Flatten(layers)
-	if !LayerEquals(flat, expected) {
+	expected := Layer{2, 2, []Pixel{0, 1, 1, 0}}
+	flat, err := Flatten(layers)
+	if err != nil {
+		t.Errorf("Flatten(%v) error: %s", encoded, err)
+	} else if !LayerEquals(flat, expected) {
 		t.Errorf("Flatten(%v) = %v; expected = %v", encoded, flat, expected)
 	}
 }
 
 // LayerEquals returns true if the two given layers are the same, false
 // otherwise.
-func LayerEquals(a, b *Layer) bool {
+func LayerEquals(a, b Layer) bool {
 	if a.width != b.width || a.height != b.height {
 		return false
 	}
