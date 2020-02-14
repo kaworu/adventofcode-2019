@@ -195,7 +195,7 @@ func Parse(r io.Reader) (*Bounds, error) {
 	}
 	numbers := strings.Split(line, "-")
 	if len(numbers) != 2 {
-		return bounds, fmt.Errorf("%s: not a range", line)
+		return bounds, fmt.Errorf("invalid range: %s", line)
 	}
 	min, err := strconv.ParseUint(numbers[0], 10, 64)
 	if err != nil {
@@ -206,7 +206,7 @@ func Parse(r io.Reader) (*Bounds, error) {
 		return bounds, err
 	}
 	if max > 999999 || max < min {
-		return bounds, fmt.Errorf("%s: invalid range", line)
+		return bounds, fmt.Errorf("invalid range; %s", line)
 	}
 	bounds.Min.Set(min)
 	bounds.Max.Set(max)

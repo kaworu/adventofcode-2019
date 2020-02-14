@@ -132,7 +132,7 @@ func (mem Memory) Execute(in Input) (Output, error) {
 		case Halt:
 			return out, nil
 		default:
-			return nil, fmt.Errorf("unsupported opcode %d", opcode)
+			return nil, fmt.Errorf("unsupported opcode: %d", opcode)
 		}
 	}
 }

@@ -194,7 +194,7 @@ func parseStep(s string) (Step, error) {
 
 	// the smallest step would be something like U1
 	if len(s) < 2 {
-		return step, fmt.Errorf("step too short")
+		return step, fmt.Errorf("step too short: %s", s)
 	}
 
 	// parse the direction
@@ -208,7 +208,7 @@ func parseStep(s string) (Step, error) {
 	case 'L':
 		step.Direction = Left
 	default:
-		return step, fmt.Errorf("unrecognized direction %c", s[0])
+		return step, fmt.Errorf("unrecognized direction: %c", s[0])
 	}
 
 	// parse the step count

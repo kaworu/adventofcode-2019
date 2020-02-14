@@ -114,7 +114,7 @@ func (c *Computer) load(mode Mode, i int) (Intcode, error) {
 	case Relative:
 		return c.fetch(c.rbo + int(param))
 	default:
-		return 0, fmt.Errorf("invalid mode %v", mode)
+		return 0, fmt.Errorf("invalid mode: %v", mode)
 	}
 }
 
@@ -244,7 +244,7 @@ func (c *Computer) Execute(program []Intcode, in Input) (Output, error) {
 		case Halt:
 			return output, nil
 		default:
-			return nil, fmt.Errorf("unsupported opcode %d", opcode)
+			return nil, fmt.Errorf("unsupported opcode: %d", opcode)
 		}
 	}
 }

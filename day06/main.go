@@ -134,7 +134,7 @@ func Parse(r io.Reader) (UniversalOrbitMap, error) {
 		line := scanner.Text()
 		desc := strings.Split(line, ")")
 		if len(desc) != 2 {
-			return nil, fmt.Errorf("%s: invalid orbit line", line)
+			return nil, fmt.Errorf("invalid orbit line: %s", line)
 		}
 		// c)o means o directly orbits c.
 		cdesc := desc[0]
@@ -151,7 +151,7 @@ func Parse(r io.Reader) (UniversalOrbitMap, error) {
 			o.orbits = c
 		}
 		if o.orbits != c {
-			return nil, fmt.Errorf("expected %v to orbits %v, got %v instead", o.desc, c.desc, o.orbits.desc)
+			return nil, fmt.Errorf("%v orbits %v; expected %v", o.desc, o.orbits.desc, c.desc)
 		}
 		o.orbits = c
 		c.orbiting = append(c.orbiting, o)

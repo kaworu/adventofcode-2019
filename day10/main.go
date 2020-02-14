@@ -98,7 +98,7 @@ func Parse(r io.Reader) ([]Asteroid, error) {
 			y++
 			x = 0
 		default:
-			return nil, fmt.Errorf("%d:%d: unexpected position %s", y, x, c)
+			return nil, fmt.Errorf("unexpected position at (%d,%d): %s", x, y, c)
 		}
 	}
 	if err := scanner.Err(); err != nil {

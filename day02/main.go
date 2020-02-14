@@ -67,7 +67,7 @@ func (mem Memory) Execute() error {
 		case Halt:
 			return nil
 		default:
-			return fmt.Errorf("unsupported opcode %d", opcode)
+			return fmt.Errorf("unsupported opcode: %d", opcode)
 		}
 		pc += 4
 	}
