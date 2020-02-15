@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"sync"
@@ -247,8 +248,7 @@ func main() {
 	// program.
 	mem, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	// part one - in series
 	ps := []Intcode{0, 1, 2, 3, 4} // phase settings

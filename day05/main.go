@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -143,23 +144,20 @@ func main() {
 	// parse the puzzle input, i.e. the initial state of the Intcode program.
 	mem, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 
 	// air conditioner unit
 	output, err := mem.Copy().Execute(Input{1})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "execution error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("execution error: %s\n", err)
 	}
 	fmt.Printf("The TEST diagnostic program output for the air conditioner unit is: %v\n", output)
 
 	// thermal radiator controller
 	output, err = mem.Copy().Execute(Input{5})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "execution error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("execution error: %s\n", err)
 	}
 	fmt.Printf("The TEST diagnostic program output for the thermal radiator controller is: %v\n", output)
 }

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -127,22 +128,19 @@ func main() {
 	width, height := 25, 6
 	layers, err := Parse(width, height, os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	l, err := MinLayerBy(layers, func(l Layer) int {
 		return l.Count(0)
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "MinLayerBy(): %s\n", err)
-		os.Exit(1)
+		log.Fatalf("MinLayerBy(): %s\n", err)
 	}
 	one, two := l.Count(1), l.Count(2)
 	fmt.Printf("The number of 1 digits multiplied by the number of 2 digits is %v * %v = %v.\n", one, two, one*two)
 	flat, err := Flatten(layers)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Flatten(): %s\n", err)
-		os.Exit(1)
+		log.Fatalf("Flatten(): %s\n", err)
 	}
 	fmt.Printf("The message after decoding the image is:\n\n%v\n", flat)
 }

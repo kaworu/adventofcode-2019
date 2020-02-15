@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -254,30 +255,25 @@ func (c *Computer) Execute(program []Intcode, in Input) (Output, error) {
 func main() {
 	boost, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 
 	var c Computer
 	output, err := c.Execute(boost, Input{1})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "execution error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("execution error: %s\n", err)
 	}
 	if len(output) != 1 {
-		fmt.Fprintf(os.Stderr, "unexpected output from the BOOST program: %v.\n", output)
-		os.Exit(1)
+		log.Fatalf("unexpected output from the BOOST program: %v.\n", output)
 	}
 	fmt.Printf("The BOOST keycode is %v,\n", output[0])
 
 	output, err = c.Execute(boost, Input{2})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "execution error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("execution error: %s\n", err)
 	}
 	if len(output) != 1 {
-		fmt.Fprintf(os.Stderr, "unexpected output from the BOOST program: %v.\n", output)
-		os.Exit(1)
+		log.Fatalf("unexpected output from the BOOST program: %v.\n", output)
 	}
 	fmt.Printf("and the coordinates of the distress signal are %v.\n", output[0])
 }

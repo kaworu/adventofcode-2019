@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -39,8 +40,7 @@ func TotalFuelRequired(modules ...Mass) (mf, ff Mass) {
 func main() {
 	modules, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	mf, ff := TotalFuelRequired(modules...)
 	fmt.Printf("The sum of the fuel requirements is %d,\n", mf)

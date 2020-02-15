@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -154,8 +155,7 @@ func Connect(a, b Wire) (md, ms int64) {
 func main() {
 	paths, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	fst := NewWire(paths[0])
 	snd := NewWire(paths[1])

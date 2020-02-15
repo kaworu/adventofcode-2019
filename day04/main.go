@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -164,8 +165,7 @@ func (p *Password) HasDouble() bool {
 func main() {
 	bounds, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	v1 := 0 // count of version 1 passwords, satisfying HasRepeatingDigits()
 	v2 := 0 // count of version 2 passwords, satisfying HasDouble()

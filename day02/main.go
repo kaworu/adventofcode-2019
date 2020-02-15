@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -80,8 +81,7 @@ func main() {
 	// parse the puzzle input, i.e. the initial state of the Intcode program.
 	initial, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 
 	// execute each possible noun and verb combination in its own goroutine

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -106,18 +107,15 @@ func (uom UniversalOrbitMap) OrbitCount() (direct, indirect int) {
 func main() {
 	uom, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	you, ok := uom["YOU"]
 	if !ok {
-		fmt.Fprint(os.Stderr, "YOU not found\n")
-		os.Exit(1)
+		log.Fatalf("YOU not found\n")
 	}
 	san, ok := uom["SAN"]
 	if !ok {
-		fmt.Fprint(os.Stderr, "SAN not found\n")
-		os.Exit(1)
+		log.Fatalf("SAN not found\n")
 	}
 	direct, indirect := uom.OrbitCount()
 	distance := you.OrbitalTransfers(san)

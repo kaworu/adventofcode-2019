@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -69,13 +70,11 @@ func BestLocation(asteroids []Asteroid) (Asteroid, int, error) {
 func main() {
 	asteroids, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	a, n, err := BestLocation(asteroids)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "BestLocation(): %s\n", err)
-		os.Exit(1)
+		log.Fatalf("BestLocation(): %s\n", err)
 	}
 	fmt.Printf("%d other asteroids can be detected from %v.\n", n, a)
 }
