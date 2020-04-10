@@ -189,7 +189,7 @@ func TestVaporize(t *testing.T) {
 ###.##.####.##.#..##
 `, "\n")
 	station := Asteroid{11, 13}
-	victims := map[int]Asteroid{
+	nth := map[int]Asteroid{
 		1:   Asteroid{11, 12},
 		2:   Asteroid{12, 1},
 		3:   Asteroid{12, 2},
@@ -207,11 +207,11 @@ func TestVaporize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse() error: %s", err)
 	}
-	laser := NewGiantLaser(station, asteroids)
+	victims := Vaporize(station, asteroids)
 	i := 0
-	for victim, ok := laser.Vaporize(); ok; victim, ok = laser.Vaporize() {
+	for victim := range victims {
 		i++
-		if expected, ok := victims[i]; ok && victim != expected {
+		if expected, ok := nth[i]; ok && victim != expected {
 			t.Errorf("laser.Vaporize() = %v; expected %v", victim, expected)
 		}
 	}

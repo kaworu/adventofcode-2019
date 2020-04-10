@@ -15,25 +15,18 @@ type Asteroid struct {
 	x, y int
 }
 
-// LineOfSight represent the direction or angle from one asteroid to another.
-// The zero value represent the direction from an asteroid to itself. A
+// LineOfSight represent the direction or angle from one Asteroid to another.
+// The zero value represent the direction from an Asteroid to itself. A
 // LineOfSight hold the invariant gcd(x, y) == 1.
 type LineOfSight struct {
 	x, y int
 }
 
-// BeamShot is a GiantLaser setting to vaporize the victim asteroid.
+// BeamShot is a giant laser setting to vaporize the victim Asteroid.
 type BeamShot struct {
 	From, To Asteroid
 	LineOfSight
 	Distance int
-}
-
-// GiantLaser is the main tool for the only solution, i.e. complete
-// vaporization.
-type GiantLaser struct {
-	base    Asteroid
-	victims []Asteroid
 }
 
 // String returns "x,y" to match the README format for Asteroid positions.
@@ -73,67 +66,58 @@ func (a Asteroid) Detect(asteroids []Asteroid) int {
 	return len(detected)
 }
 
-// NewGiantLaser build a GiantLaser at the given base in order to vaporize the
-// given asteroids.
-func NewGiantLaser(base Asteroid, asteroids []Asteroid) *GiantLaser {
-	// create a BeamShot for every victim this GiantLaser is going to hit. The
-	// ring represent the victims indexed by their shooting angle.
-	ring := make(map[LineOfSight][]*BeamShot)
-	// count how many asteroid we're shooting at, because asteroids may contain
-	// the base which we obviously don't want to vaporize.
-	n := 0
-	for _, o := range asteroids {
-		if o != base {
-			shot := base.BeamShot(o)
-			ring[shot.LineOfSight] = append(ring[shot.LineOfSight], &shot)
-			n++
-		}
-	}
-
-	// because the laser only has enough power to vaporize one asteroid at a
-	// time before continuing its rotation, the victims are sorted by distance
-	// (closest first) for every shoot angle.
-	for _, shots := range ring {
-		sort.Slice(shots, func(i, j int) bool {
-			return shots[i].Distance < shots[j].Distance
-		})
-	}
-
-	// build and sort the angles where we're going to have a BeamShot.
-	lines := make([]LineOfSight, 0, len(ring))
-	for k := range ring {
-		lines = append(lines, k)
-	}
-	sort.Slice(lines, func(i, j int) bool {
-		return lines[i].Angle() < lines[j].Angle()
-	})
-
-	// build the victims in the shooting order. We rotate through every
-	// BeamShot angles and pick the closest Asteroid to be seen until there are
-	// none left.
-	victims := make([]Asteroid, 0, n)
-	for len(victims) < n {
-		for _, l := range lines {
-			if shots := ring[l]; len(shots) > 0 {
-				victims = append(victims, shots[0].To)
-				ring[l] = shots[1:]
+// Vaporize returns a channel of Asteroid to be vaporized (in order) by a giant
+// laser installed at the given station.
+func Vaporize(station Asteroid, asteroids []Asteroid) <-chan Asteroid {
+	victims := make(chan Asteroid)
+	go func() {
+		defer close(victims)
+		// create a BeamShot for every asteroid that is going to be vaporized.
+		// The ring represent the victims indexed by their shooting angle.
+		ring := make(map[LineOfSight][]*BeamShot)
+		// count how many asteroid we're shooting at, because asteroids may contain
+		// the station which we obviously don't want to vaporize.
+		n := 0
+		for _, o := range asteroids {
+			if o != station {
+				shot := station.BeamShot(o)
+				ring[shot.LineOfSight] = append(ring[shot.LineOfSight], &shot)
+				n++
 			}
 		}
-	}
 
-	return &GiantLaser{base: base, victims: victims}
-}
+		// because the laser only has enough power to vaporize one asteroid at a
+		// time before continuing its rotation, the victims are sorted by distance
+		// (closest first) for every shoot angle.
+		for _, shots := range ring {
+			sort.Slice(shots, func(i, j int) bool {
+				return shots[i].Distance < shots[j].Distance
+			})
+		}
 
-// Vaporize make the GiantLaser shot at an asteroid. It returns the vaporized
-// Asteroid and true if there was one to vaporize, the Asteroid zero value and
-// false otherwise.
-func (l *GiantLaser) Vaporize() (Asteroid, bool) {
-	if len(l.victims) == 0 {
-		return Asteroid{}, false
-	}
-	vaporized := l.victims[0]
-	l.victims = l.victims[1:]
-	return vaporized, true
+		// build and sort the angles at which the laster is going to BeamShot.
+		lines := make([]LineOfSight, 0, len(ring))
+		for k := range ring {
+			lines = append(lines, k)
+		}
+		sort.Slice(lines, func(i, j int) bool {
+			return lines[i].Angle() < lines[j].Angle()
+		})
+
+		// vaporize the victims in order. We rotate through every BeamShot
+		// angles and pick the closest Asteroid to be seen until there are none
+		// left.
+		for n > 0 {
+			for _, l := range lines {
+				if shots := ring[l]; len(shots) > 0 {
+					victims <- shots[0].To
+					ring[l] = shots[1:]
+					n--
+				}
+			}
+		}
+	}()
+	return victims
 }
 
 // BestLocation find the asteroid which would be the best place to build a new
@@ -161,14 +145,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("input error: %s\n", err)
 	}
+
 	a, n, err := BestLocation(asteroids)
 	if err != nil {
 		log.Fatalf("BestLocation(): %s\n", err)
 	}
-	laser := NewGiantLaser(a, asteroids)
-	bet := laser.victims[199]
 	fmt.Printf("%d other asteroids can be detected from %v,\n", n, a)
-	fmt.Printf("and the 200th asteroid to be vaporized is at %v.\n", bet)
+
+	victims := Vaporize(a, asteroids)
+	for i := 0; i < 199; i++ {
+		if _, ok := <-victims; !ok {
+			log.Fatalf("only %d asteroid(s) vaporized; expected at least 200\n", i)
+		}
+	}
+	vaporized := <-victims // the 200th
+	fmt.Printf("and the 200th asteroid to be vaporized is at %v.\n", vaporized)
 }
 
 // Parse the map of asteroid in the region. It returns the complete asteroid
