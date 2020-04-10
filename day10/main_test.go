@@ -164,3 +164,58 @@ func TestBestLocation(t *testing.T) {
 		}
 	}
 }
+
+func TestVaporize(t *testing.T) {
+	belt := strings.Trim(`
+.#..##.###...#######
+##.############..##.
+.#.######.########.#
+.###.#######.####.#.
+#####.##.#.##.###.##
+..#####..#.#########
+####################
+#.####....###.#.#.##
+##.#################
+#####.##.###..####..
+..######..##.#######
+####.##.####...##..#
+.#####..#.######.###
+##...#.##########...
+#.##########.#######
+.####.#.###.###.#.##
+....##.##.###..#####
+.#.#.###########.###
+#.#.#.#####.####.###
+###.##.####.##.#..##
+`, "\n")
+	station := Asteroid{11, 13}
+	victims := map[int]Asteroid{
+		1:   Asteroid{11, 12},
+		2:   Asteroid{12, 1},
+		3:   Asteroid{12, 2},
+		10:  Asteroid{12, 8},
+		20:  Asteroid{16, 0},
+		50:  Asteroid{16, 9},
+		100: Asteroid{10, 16},
+		199: Asteroid{9, 6},
+		200: Asteroid{8, 2},
+		201: Asteroid{10, 9},
+		299: Asteroid{11, 1},
+	}
+
+	asteroids, err := Parse(strings.NewReader(belt))
+	if err != nil {
+		t.Fatalf("Parse() error: %s", err)
+	}
+	laser := NewGiantLaser(station, asteroids)
+	i := 0
+	for victim, ok := laser.Vaporize(); ok; victim, ok = laser.Vaporize() {
+		i++
+		if expected, ok := victims[i]; ok && victim != expected {
+			t.Errorf("laser.Vaporize() = %v; expected %v", victim, expected)
+		}
+	}
+	if i != len(asteroids)-1 {
+		t.Errorf("vaporized %v asteroids; expected %v", i, len(asteroids)-1)
+	}
+}

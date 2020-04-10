@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
+	"sort"
 )
 
 // Asteroid is a celestial body in the asteroid belt.
@@ -20,31 +22,118 @@ type LineOfSight struct {
 	x, y int
 }
 
-// LineOfSight compute and returns the direction from a to o.
-func (a Asteroid) LineOfSight(o Asteroid) LineOfSight {
+// BeamShot is a GiantLaser setting to vaporize the victim asteroid.
+type BeamShot struct {
+	From, To Asteroid
+	LineOfSight
+	Distance int
+}
+
+// GiantLaser is the main tool for the only solution, i.e. complete
+// vaporization.
+type GiantLaser struct {
+	base    Asteroid
+	victims []Asteroid
+}
+
+// String returns "x,y" to match the README format for Asteroid positions.
+func (a Asteroid) String() string {
+	return fmt.Sprintf("%d,%d", a.x, a.y)
+}
+
+// Angle of this line of sight, up being 0 and increasing clockwise.
+func (l LineOfSight) Angle() float64 {
+	return 180 - (180/math.Pi)*math.Atan2(float64(l.x), float64(l.y))
+}
+
+// BeamShot compute and returns the shot needed to vaporize o from a.
+func (a Asteroid) BeamShot(o Asteroid) BeamShot {
 	dx, dy := o.x-a.x, o.y-a.y
 	div := gcd(dx, dy)
 	switch {
 	case div < 0:
 		div = -div
 	case div == 0:
-		return LineOfSight{x: 0, y: 0}
+		return BeamShot{From: a, To: o}
 	}
-	return LineOfSight{x: dx / div, y: dy / div}
+	los := LineOfSight{x: dx / div, y: dy / div}
+	return BeamShot{From: a, To: o, LineOfSight: los, Distance: div}
 }
 
 // Detect returns the count of others asteroid in direct line of sight from a.
 // When two asteroids are in the same line of sight they will be counted as one
-// since the farthest  one is "hidden behind" the closest one.
-func (a Asteroid) Detect(others []Asteroid) int {
+// since the farthest one is "hidden behind" the closest one.
+func (a Asteroid) Detect(asteroids []Asteroid) int {
 	detected := make(map[LineOfSight]struct{}) // "set-like" map
-	for _, o := range others {
+	for _, o := range asteroids {
 		if a != o {
-			los := a.LineOfSight(o)
-			detected[los] = struct{}{}
+			detected[a.BeamShot(o).LineOfSight] = struct{}{}
 		}
 	}
 	return len(detected)
+}
+
+// NewGiantLaser build a GiantLaser at the given base in order to vaporize the
+// given asteroids.
+func NewGiantLaser(base Asteroid, asteroids []Asteroid) *GiantLaser {
+	// create a BeamShot for every victim this GiantLaser is going to hit. The
+	// ring represent the victims indexed by their shooting angle.
+	ring := make(map[LineOfSight][]*BeamShot)
+	// count how many asteroid we're shooting at, because asteroids may contain
+	// the base which we obviously don't want to vaporize.
+	n := 0
+	for _, o := range asteroids {
+		if o != base {
+			shot := base.BeamShot(o)
+			ring[shot.LineOfSight] = append(ring[shot.LineOfSight], &shot)
+			n++
+		}
+	}
+
+	// because the laser only has enough power to vaporize one asteroid at a
+	// time before continuing its rotation, the victims are sorted by distance
+	// (closest first) for every shoot angle.
+	for _, shots := range ring {
+		sort.Slice(shots, func(i, j int) bool {
+			return shots[i].Distance < shots[j].Distance
+		})
+	}
+
+	// build and sort the angles where we're going to have a BeamShot.
+	lines := make([]LineOfSight, 0, len(ring))
+	for k := range ring {
+		lines = append(lines, k)
+	}
+	sort.Slice(lines, func(i, j int) bool {
+		return lines[i].Angle() < lines[j].Angle()
+	})
+
+	// build the victims in the shooting order. We rotate through every
+	// BeamShot angles and pick the closest Asteroid to be seen until there are
+	// none left.
+	victims := make([]Asteroid, 0, n)
+	for len(victims) < n {
+		for _, l := range lines {
+			if shots := ring[l]; len(shots) > 0 {
+				victims = append(victims, shots[0].To)
+				ring[l] = shots[1:]
+			}
+		}
+	}
+
+	return &GiantLaser{base: base, victims: victims}
+}
+
+// Vaporize make the GiantLaser shot at an asteroid. It returns the vaporized
+// Asteroid and true if there was one to vaporize, the Asteroid zero value and
+// false otherwise.
+func (l *GiantLaser) Vaporize() (Asteroid, bool) {
+	if len(l.victims) == 0 {
+		return Asteroid{}, false
+	}
+	vaporized := l.victims[0]
+	l.victims = l.victims[1:]
+	return vaporized, true
 }
 
 // BestLocation find the asteroid which would be the best place to build a new
@@ -76,7 +165,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("BestLocation(): %s\n", err)
 	}
-	fmt.Printf("%d other asteroids can be detected from %v.\n", n, a)
+	laser := NewGiantLaser(a, asteroids)
+	bet := laser.victims[199]
+	fmt.Printf("%d other asteroids can be detected from %v,\n", n, a)
+	fmt.Printf("and the 200th asteroid to be vaporized is at %v.\n", bet)
 }
 
 // Parse the map of asteroid in the region. It returns the complete asteroid
