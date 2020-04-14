@@ -55,6 +55,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -62,8 +63,7 @@ import (
 func main() {
 	lines, err := Parse(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "input error: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("input error: %s\n", err)
 	}
 	fmt.Print(lines)
 }
