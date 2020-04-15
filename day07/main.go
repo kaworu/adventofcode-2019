@@ -48,7 +48,7 @@ type (
 	Memory []Intcode
 	// Amplifier is a Intcode computer.
 	Amplifier struct {
-		Memory
+		mem    Memory
 		Input  <-chan Intcode
 		Output chan<- Intcode
 		pc     int64 // instruction pointer
@@ -104,7 +104,7 @@ func (mem Memory) Copy() Memory {
 // Execute run the Intcode program in the Amplifier's memory.
 // It returns an error on failure.
 func (amp *Amplifier) Execute() error {
-	mem := amp.Memory
+	mem := amp.mem
 	for {
 		opcode := mem[amp.pc] % 100
 		lhsm := (mem[amp.pc] / 100) % 10  // first operand mode
@@ -192,7 +192,7 @@ func FeedbackLoop(apc Memory, seq []Intcode) Intcode {
 			c <- 0
 		}
 		prev := mod(i-1, n)
-		amps[i].Memory = apc.Copy()
+		amps[i].mem = apc.Copy()
 		amps[i].Input = c
 		amps[prev].Output = c
 	}
