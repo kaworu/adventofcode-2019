@@ -23,7 +23,7 @@ const (
 
 // Step represent a path component.
 type Step struct {
-	Direction byte  // Direction is either Up, Right, Down or Left.
+	Direction uint8 // Direction is either Up, Right, Down or Left.
 	Count     int64 // Count is the step's number of port.
 }
 
