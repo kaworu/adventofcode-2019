@@ -20,10 +20,10 @@ const (
 	Read = 3
 	// Write ouputs the value of its only parameter.
 	Write = 4
-	// JumpIfTrue update the instruction pointer of the first parameter is
+	// JumpIfTrue update the instruction pointer if the first parameter is
 	// non-zero.
 	JumpIfTrue = 5
-	// JumpIfFalse update the instruction pointer of the first parameter is
+	// JumpIfFalse update the instruction pointer if the first parameter is
 	// zero.
 	JumpIfFalse = 6
 	// LessThan is the "lesser than" comparison opcode.
