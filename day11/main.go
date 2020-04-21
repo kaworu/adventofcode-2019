@@ -171,32 +171,30 @@ func (r *Robot) Paint(ship *Spacecraft, program []Intcode) error {
 
 	// brain setup
 	halt := make(chan error)
-	defer close(halt)
 	go func() {
 		halt <- r.brain.Execute(program)
+		close(halt)
 	}()
 
+	nread := 0
 	for {
+		picture := shoot()
 		select {
 		case err := <-halt:
 			return err
-		case r.brain.input <- Intcode(shoot()):
-		}
-		select {
-		case err := <-halt:
-			return err
-			// First, it will output a value indicating the color to paint the
-			// panel the robot is over:
-		case c := <-r.brain.output:
-			paint(Color(c))
-		}
-		select {
-		case err := <-halt:
-			return err
-			// Second, it will output a value indicating the direction the
-			// robot should turn.
-		case d := <-r.brain.output:
-			turn(Direction(d))
+		case r.brain.input <- Intcode(picture):
+			// the computer has read our picture shoot.
+		case o := <-r.brain.output:
+			nread++
+			if nread%2 == 1 {
+				// First, it will output a value indicating the color to paint
+				// the panel the robot is over.
+				paint(Color(o))
+			} else {
+				// Second, it will output a value indicating the direction the
+				// robot should turn.
+				turn(Direction(o))
+			}
 		}
 	}
 }
