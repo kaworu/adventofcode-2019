@@ -189,7 +189,7 @@ func FeedbackLoop(apc Memory, seq []Intcode) Intcode {
 		c := make(chan Intcode, 2)
 		c <- seq[i] // phase setting
 		if i == 0 {
-			c <- 0
+			c <- 0 // The first amplifier's input value is 0.
 		}
 		prev := mod(i-1, n)
 		amps[i].mem = apc.Copy()
