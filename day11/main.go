@@ -112,6 +112,12 @@ func (h Heading) Turning(d Direction) Heading {
 	}
 }
 
+// PointOfOrigin return the painting robot's starting point, the one at the
+// center of the ship.
+func PointOfOrigin() Point {
+	return Point{x: 0, y: 0}
+}
+
 // Moving returns the landing point when moving in the provided Heading from p.
 func (p Point) Moving(h Heading) Point {
 	switch h {
@@ -136,8 +142,46 @@ func NewSpacecraft() *Spacecraft {
 }
 
 // PaintedPanelCount returns the number of panels that were painted at least once.
-func (ship Spacecraft) PaintedPanelCount() int {
+func (ship *Spacecraft) PaintedPanelCount() int {
 	return len(ship.panels)
+}
+
+// PaintItBlack paint every already painted panels in Black.
+func (ship *Spacecraft) PaintItBlack() {
+	for p := range ship.panels {
+		ship.panels[p] = Black
+	}
+}
+
+// String implement Stringer for Spacecraft displaying its panels.
+func (ship Spacecraft) String() string {
+	min, max := PointOfOrigin(), PointOfOrigin()
+	for p := range ship.panels {
+		if p.x < min.x {
+			min.x = p.x
+		} else if p.x > max.x {
+			max.x = p.x
+		}
+		if p.y < min.y {
+			min.y = p.y
+		} else if p.y > max.y {
+			max.y = p.y
+		}
+	}
+
+	var buf bytes.Buffer
+	for y := min.y; y <= max.y; y++ {
+		for x := min.x; x <= max.x; x++ {
+			c := ship.panels[Point{x: x, y: y}]
+			if c == White {
+				buf.WriteString("#")
+			} else {
+				buf.WriteString(".")
+			}
+		}
+		buf.WriteString("\n")
+	}
+	return buf.String()
 }
 
 // NewRobot create a Robot running the given paint program.
@@ -153,6 +197,10 @@ func NewRobot() *Robot {
 // Paint deploy the robot on the given Spacecraft in order to paint its panels
 // following the provided program.
 func (r *Robot) Paint(ship *Spacecraft, program []Intcode) error {
+	// position and heading setup.
+	r.Point = PointOfOrigin()
+	r.Heading = North // The robot starts facing up
+
 	// camera setup
 	shoot := func() Color {
 		return ship.panels[r.Point]
@@ -213,8 +261,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("painting error: %s\n", err)
 	}
+	fmt.Printf("%d panels were paint at least once,\n", ship.PaintedPanelCount())
 
-	fmt.Printf("%d panels were paint at least once.\n", ship.PaintedPanelCount())
+	// redo the painting with the robot starting on a white panel.
+	ship.PaintItBlack()
+	ship.panels[PointOfOrigin()] = White
+	err = robot.Paint(ship, program)
+	if err != nil {
+		log.Fatalf("painting error: %s\n", err)
+	}
+	fmt.Printf("and here is your ship after the robot started on a white panel:\n%v", ship)
 }
 
 // Parse an Intcode program.
