@@ -218,8 +218,6 @@ func (r *Robot) Paint(ship *Spacecraft, program []Intcode) error {
 	}
 
 	// brain setup
-	// FIXME: a channel might be overkill,
-	// try: ctx, cancel := context.WithCancel(context.Background())
 	halt := make(chan error)
 	go func() {
 		halt <- r.brain.Execute(program)
