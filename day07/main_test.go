@@ -60,7 +60,7 @@ func TestHighestSignal(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
-			output := HighestSignal(tc.Program, Shuffled(tc.Sequence))
+			output := HighestSignal(tc.Program, shuffled(tc.Sequence))
 			if output != tc.Expected {
 				t.Errorf("output = %v; expected %v", output, tc.Expected)
 			}
@@ -68,9 +68,9 @@ func TestHighestSignal(t *testing.T) {
 	}
 }
 
-// Shuffled return a copy of the given slice with its element in a random
+// shuffled return a copy of the given slice with its element in a random
 // order. Note that rand.Seed() must has been called before this function.
-func Shuffled(xs []Intcode) []Intcode {
+func shuffled(xs []Intcode) []Intcode {
 	ys := make([]Intcode, len(xs))
 	copy(ys, xs)
 	rand.Shuffle(len(xs), func(i, j int) { ys[i], ys[j] = ys[j], ys[i] })

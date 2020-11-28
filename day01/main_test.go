@@ -3,8 +3,6 @@ package main
 import "testing"
 
 func TestFuelRequired(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		Name string
 		Mass
@@ -17,9 +15,7 @@ func TestFuelRequired(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc // capture range variable
 		t.Run(tc.Name, func(t *testing.T) {
-			t.Parallel()
 			if r := FuelRequired(tc.Mass); r != tc.Expected {
 				t.Errorf("FuelRequired(%d) = %d; expected %d", tc.Mass, r, tc.Expected)
 			}
@@ -28,8 +24,6 @@ func TestFuelRequired(t *testing.T) {
 }
 
 func TestTotalFuelRequired(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		Name string
 		Mass
@@ -41,9 +35,7 @@ func TestTotalFuelRequired(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc // capture range variable
 		t.Run(tc.Name, func(t *testing.T) {
-			t.Parallel()
 			mf, ff := TotalFuelRequired(tc.Mass)
 			if r := mf + ff; r != tc.Expected {
 				t.Errorf("TotalFuelRequired(%v) = %d; expected %d", tc.Mass, r, tc.Expected)
