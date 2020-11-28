@@ -100,7 +100,7 @@ func (l Layer) Count(ref Pixel) int {
 	return n
 }
 
-// String implement fmt Stringer interface for Layer.
+// String implements Stringer for Layer.
 func (l Layer) String() string {
 	var buf bytes.Buffer
 	for y := 0; y < l.height; y++ {

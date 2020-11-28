@@ -60,7 +60,7 @@ type Robot struct {
 	Point
 }
 
-// String implement Stringer for Heading.
+// String implements Stringer for Heading.
 func (h Heading) String() string {
 	switch h {
 	case North:
@@ -76,7 +76,7 @@ func (h Heading) String() string {
 	}
 }
 
-// String implement Stringer for Direction.
+// String implements Stringer for Direction.
 func (d Direction) String() string {
 	switch d {
 	case Left:
@@ -88,7 +88,7 @@ func (d Direction) String() string {
 	}
 }
 
-// String implement Stringer for Color.
+// String implements Stringer for Color.
 func (c Color) String() string {
 	switch c {
 	case White:
@@ -153,7 +153,7 @@ func (ship *Spacecraft) PaintItBlack() {
 	}
 }
 
-// String implement Stringer for Spacecraft displaying its panels.
+// String implements Stringer for Spacecraft displaying its panels.
 func (ship Spacecraft) String() string {
 	min, max := PointOfOrigin(), PointOfOrigin()
 	for p := range ship.panels {

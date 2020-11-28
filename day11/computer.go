@@ -48,7 +48,7 @@ type Mode uint8
 // Intcode is a value in the Computer's memory.
 type Intcode int64
 
-// Computer implement a complete Intcode computer.
+// Computer implements a complete Intcode computer.
 type Computer struct {
 	mem    []Intcode // memory
 	input  chan Intcode

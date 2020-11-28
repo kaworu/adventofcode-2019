@@ -61,7 +61,7 @@ type (
 	Output []Intcode
 )
 
-// Computer implement a complete Intcode computer.
+// Computer implements a complete Intcode computer.
 type Computer struct {
 	mem []Intcode // memory
 	pc  int       // instruction pointer
