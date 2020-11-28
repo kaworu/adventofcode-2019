@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/kAworu/adventofcode-2019.svg?branch=master)](https://travis-ci.org/kAworu/adventofcode-2019)
+![Check](https://github.com/kAworu/adventofcode-2019/workflows/Check/badge.svg)
+![Test](https://github.com/kAworu/adventofcode-2019/workflows/Test/badge.svg)
 
 # Advent of Code 2019
 
