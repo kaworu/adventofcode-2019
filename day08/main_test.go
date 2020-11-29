@@ -18,23 +18,23 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Parse(%v) error: %s", encoded, err)
 	} else if len(decoded) != len(layers) {
-		t.Errorf("got %d layers; expected %d", len(decoded), len(layers))
+		t.Errorf("got %d layers; want %d", len(decoded), len(layers))
 	} else {
 		for i := range layers {
 			if !LayerEquals(decoded[i], layers[i]) {
-				t.Errorf("layers[%d] = %v; expected %v", i, decoded[i], layers[i])
+				t.Errorf("layers[%d] = %v; want %v", i, decoded[i], layers[i])
 			}
 		}
 	}
 }
 
 func TestFlatten(t *testing.T) {
-	expected := Layer{2, 2, []Pixel{0, 1, 1, 0}}
+	want := Layer{2, 2, []Pixel{0, 1, 1, 0}}
 	flat, err := Flatten(layers)
 	if err != nil {
 		t.Errorf("Flatten(%v) error: %s", encoded, err)
-	} else if !LayerEquals(flat, expected) {
-		t.Errorf("Flatten(%v) = %v; expected = %v", encoded, flat, expected)
+	} else if !LayerEquals(flat, want) {
+		t.Errorf("Flatten(%v) = %v; want = %v", encoded, flat, want)
 	}
 }
 

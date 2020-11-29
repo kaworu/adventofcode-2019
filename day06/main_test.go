@@ -18,7 +18,7 @@ E)J
 J)K
 K)L
 `
-	expected := struct {
+	want := struct {
 		direct, indirect int
 	}{11, 31}
 
@@ -27,11 +27,11 @@ K)L
 		t.Fatalf("Parsing error")
 	}
 	direct, indirect := uom.OrbitCount()
-	if direct != expected.direct {
-		t.Errorf("got %v direct orbits; expected %v", direct, expected.direct)
+	if direct != want.direct {
+		t.Errorf("got %v direct orbits; want %v", direct, want.direct)
 	}
-	if indirect != expected.indirect {
-		t.Errorf("got %v inddirect orbits; expected %v", indirect, expected.indirect)
+	if indirect != want.indirect {
+		t.Errorf("got %v inddirect orbits; want %v", indirect, want.indirect)
 	}
 }
 
@@ -50,7 +50,7 @@ K)L
 K)YOU
 I)SAN
 `
-	expected := 4
+	want := 4
 
 	uom, err := Parse(strings.NewReader(input))
 	if err != nil {
@@ -64,7 +64,7 @@ I)SAN
 	if !ok {
 		t.Fatalf("Parsing error: SAN can not be found")
 	}
-	if n := you.OrbitalTransfers(san); n != expected {
-		t.Errorf("got %v orbital transfers; expected %v", n, expected)
+	if n := you.OrbitalTransfers(san); n != want {
+		t.Errorf("got %v orbital transfers; want %v", n, want)
 	}
 }

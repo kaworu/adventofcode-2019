@@ -6,21 +6,22 @@ import (
 
 func TestTurning(t *testing.T) {
 	tests := []struct {
-		From, To Heading
-		Direction
+		from Heading
+		dir  Direction
+		want Heading
 	}{
-		{From: North, Direction: Right, To: East},
-		{From: North, Direction: Left, To: West},
-		{From: East, Direction: Right, To: South},
-		{From: East, Direction: Left, To: North},
-		{From: South, Direction: Right, To: West},
-		{From: South, Direction: Left, To: East},
-		{From: West, Direction: Right, To: North},
-		{From: West, Direction: Left, To: South},
+		{from: North, dir: Right, want: East},
+		{from: North, dir: Left, want: West},
+		{from: East, dir: Right, want: South},
+		{from: East, dir: Left, want: North},
+		{from: South, dir: Right, want: West},
+		{from: South, dir: Left, want: East},
+		{from: West, dir: Right, want: North},
+		{from: West, dir: Left, want: South},
 	}
 	for _, tc := range tests {
-		if h := tc.From.Turning(tc.Direction); h != tc.To {
-			t.Errorf("%v.Turning(%v) = %v; expected %v", tc.From, tc.Direction, h, tc.To)
+		if h := tc.from.Turning(tc.dir); h != tc.want {
+			t.Errorf("%v.Turning(%v) = %v; want %v", tc.from, tc.dir, h, tc.want)
 		}
 	}
 }
@@ -28,18 +29,19 @@ func TestTurning(t *testing.T) {
 func TestMoving(t *testing.T) {
 	origin := Point{x: 0, y: 0}
 	tests := []struct {
-		From, To Point
-		Heading
+		from    Point
+		heading Heading
+		want    Point
 	}{
-		{From: origin, Heading: North, To: Point{x: 0, y: -1}},
-		{From: origin, Heading: East, To: Point{x: 1, y: 0}},
-		{From: origin, Heading: South, To: Point{x: 0, y: 1}},
-		{From: origin, Heading: West, To: Point{x: -1, y: 0}},
-		{From: origin, Heading: West + 1, To: origin}, // invalid heading.
+		{from: origin, heading: North, want: Point{x: 0, y: -1}},
+		{from: origin, heading: East, want: Point{x: 1, y: 0}},
+		{from: origin, heading: South, want: Point{x: 0, y: 1}},
+		{from: origin, heading: West, want: Point{x: -1, y: 0}},
+		{from: origin, heading: West + 1, want: origin}, // invalid heading.
 	}
 	for _, tc := range tests {
-		if p := tc.From.Moving(tc.Heading); p != tc.To {
-			t.Errorf("%v.Moving(%v) = %v; expected %v", tc.From, tc.Heading, p, tc.To)
+		if p := tc.from.Moving(tc.heading); p != tc.want {
+			t.Errorf("%v.Moving(%v) = %v; want %v", tc.from, tc.heading, p, tc.want)
 		}
 	}
 }

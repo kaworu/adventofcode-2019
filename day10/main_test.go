@@ -15,7 +15,7 @@ func TestParse(t *testing.T) {
 ...##
 `, "\n")
 
-	expected := []Asteroid{
+	want := []Asteroid{
 		Asteroid{1, 0}, Asteroid{4, 0},
 		Asteroid{0, 2}, Asteroid{1, 2}, Asteroid{2, 2}, Asteroid{3, 2}, Asteroid{4, 2},
 		Asteroid{4, 3},
@@ -26,12 +26,12 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse() error: %s", err)
 	}
-	if len(decoded) != len(expected) {
-		t.Fatalf("got %d asteroids; expected %d", len(decoded), len(expected))
+	if len(decoded) != len(want) {
+		t.Fatalf("got %d asteroids; want %d", len(decoded), len(want))
 	}
-	for i := range expected {
-		if decoded[i] != expected[i] {
-			t.Errorf("asteroids[%d] = %v; expected %v", i, decoded[i], expected[i])
+	for i := range want {
+		if decoded[i] != want[i] {
+			t.Errorf("asteroids[%d] = %v; want %v", i, decoded[i], want[i])
 		}
 	}
 }
@@ -60,19 +60,19 @@ func TestDetect(t *testing.T) {
 
 	for _, tc := range tests {
 		if n := tc.Asteroid.Detect(all); n != tc.Detected {
-			t.Errorf("%v.Detect() = %d; expected %d", tc.Asteroid, n, tc.Detected)
+			t.Errorf("%v.Detect() = %d; want %d", tc.Asteroid, n, tc.Detected)
 		}
 	}
 }
 
 func TestBestLocation(t *testing.T) {
 	tests := []struct {
-		Map      string
-		Best     Asteroid
-		Detected int
+		plan     string
+		best     Asteroid
+		detected int
 	}{
 		{
-			Map: strings.Trim(`
+			plan: strings.Trim(`
 ......#.#.
 #..#.#....
 ..#######.
@@ -84,11 +84,11 @@ func TestBestLocation(t *testing.T) {
 ##...#..#.
 .#....####
 `, "\n"),
-			Best:     Asteroid{5, 8},
-			Detected: 33,
+			best:     Asteroid{5, 8},
+			detected: 33,
 		},
 		{
-			Map: strings.Trim(`
+			plan: strings.Trim(`
 #.#...#.#.
 .###....#.
 .#....#...
@@ -100,11 +100,11 @@ func TestBestLocation(t *testing.T) {
 ......#...
 .####.###.
 `, "\n"),
-			Best:     Asteroid{1, 2},
-			Detected: 35,
+			best:     Asteroid{1, 2},
+			detected: 35,
 		},
 		{
-			Map: strings.Trim(`
+			plan: strings.Trim(`
 .#..#..###
 ####.###.#
 ....###.#.
@@ -116,11 +116,11 @@ func TestBestLocation(t *testing.T) {
 .##...##.#
 .....#.#..
 `, "\n"),
-			Best:     Asteroid{6, 3},
-			Detected: 41,
+			best:     Asteroid{6, 3},
+			detected: 41,
 		},
 		{
-			Map: strings.Trim(`
+			plan: strings.Trim(`
 .#..##.###...#######
 ##.############..##.
 .#.######.########.#
@@ -142,13 +142,13 @@ func TestBestLocation(t *testing.T) {
 #.#.#.#####.####.###
 ###.##.####.##.#..##
 `, "\n"),
-			Best:     Asteroid{11, 13},
-			Detected: 210,
+			best:     Asteroid{11, 13},
+			detected: 210,
 		},
 	}
 
 	for i, tc := range tests {
-		asteroids, err := Parse(strings.NewReader(tc.Map))
+		asteroids, err := Parse(strings.NewReader(tc.plan))
 		if err != nil {
 			t.Errorf("tests[%d]: Parse() error: %s", i, err)
 			continue
@@ -157,10 +157,10 @@ func TestBestLocation(t *testing.T) {
 		switch {
 		case err != nil:
 			t.Errorf("tests[%d]: BestLocation() error: %s", i, err)
-		case best != tc.Best:
-			t.Errorf("tests[%d]: best = %v; expected %v", i, best, tc.Best)
-		case detected != tc.Detected:
-			t.Errorf("tests[%d]: detected = %d; expected %v", i, detected, tc.Detected)
+		case best != tc.best:
+			t.Errorf("tests[%d]: best = %v; want %v", i, best, tc.best)
+		case detected != tc.detected:
+			t.Errorf("tests[%d]: detected = %d; want %v", i, detected, tc.detected)
 		}
 	}
 }
@@ -211,11 +211,11 @@ func TestVaporize(t *testing.T) {
 	i := 0
 	for victim := range victims {
 		i++
-		if expected, ok := nth[i]; ok && victim != expected {
-			t.Errorf("laser.Vaporize() = %v; expected %v", victim, expected)
+		if want, ok := nth[i]; ok && victim != want {
+			t.Errorf("laser.Vaporize() = %v; want %v", victim, want)
 		}
 	}
 	if i != len(asteroids)-1 {
-		t.Errorf("vaporized %v asteroids; expected %v", i, len(asteroids)-1)
+		t.Errorf("vaporized %v asteroids; want %v", i, len(asteroids)-1)
 	}
 }

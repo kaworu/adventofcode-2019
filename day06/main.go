@@ -149,7 +149,7 @@ func Parse(r io.Reader) (UniversalOrbitMap, error) {
 			o.orbits = c
 		}
 		if o.orbits != c {
-			return nil, fmt.Errorf("%v orbits %v; expected %v", o.desc, o.orbits.desc, c.desc)
+			return nil, fmt.Errorf("%v orbits %v; expected %v instead", o.desc, o.orbits.desc, c.desc)
 		}
 		o.orbits = c
 		c.orbiting = append(c.orbiting, o)

@@ -7,14 +7,14 @@ import (
 
 func TestParse(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Input    string
-		Expected []Path
+		name  string
+		input string
+		want  []Path
 	}{
 		{
-			Name:  "detailed example",
-			Input: "R8,U5,L5,D3\nU7,R6,D4,L4",
-			Expected: []Path{
+			name:  "detailed example",
+			input: "R8,U5,L5,D3\nU7,R6,D4,L4",
+			want: []Path{
 				Path{
 					Step{Right, 8},
 					Step{Up, 5},
@@ -30,9 +30,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			Name:  "first example",
-			Input: "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
-			Expected: []Path{
+			name:  "first example",
+			input: "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
+			want: []Path{
 				Path{
 					Step{Right, 75},
 					Step{Down, 30},
@@ -57,9 +57,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			Name:  "second example",
-			Input: "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
-			Expected: []Path{
+			name:  "second example",
+			input: "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+			want: []Path{
 				Path{
 					Step{Right, 98},
 					Step{Up, 47},
@@ -90,17 +90,17 @@ func TestParse(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			paths, err := Parse(strings.NewReader(tc.Input))
+		t.Run(tc.name, func(t *testing.T) {
+			paths, err := Parse(strings.NewReader(tc.input))
 			if err != nil {
-				t.Errorf("Parse() error: %s", err)
+				t.Fatalf("Parse() error: %s", err)
 			}
-			if len(paths) != len(tc.Expected) {
-				t.Errorf("len(paths) = %d; expected %d", len(paths), len(tc.Expected))
+			if len(paths) != len(tc.want) {
+				t.Fatalf("len(paths) = %d; want %d", len(paths), len(tc.want))
 			}
 			for i := range paths {
-				if !PathEqual(paths[i], tc.Expected[i]) {
-					t.Errorf("paths[%d] = %v; expected %v", i, paths[i], tc.Expected[i])
+				if !PathEqual(paths[i], tc.want[i]) {
+					t.Errorf("paths[%d] = %v; want %v", i, paths[i], tc.want[i])
 				}
 			}
 		})
@@ -109,48 +109,48 @@ func TestParse(t *testing.T) {
 
 func TestClosest(t *testing.T) {
 	tests := []struct {
-		Name             string
-		Input            string
-		ExpectedDistance int64
-		ExpectedSteps    int64
+		name  string
+		input string
+		dist  int64
+		steps int64
 	}{
 		{
-			Name:             "detailed example",
-			Input:            "R8,U5,L5,D3\nU7,R6,D4,L4",
-			ExpectedDistance: 6,
-			ExpectedSteps:    30,
+			name:  "detailed example",
+			input: "R8,U5,L5,D3\nU7,R6,D4,L4",
+			dist:  6,
+			steps: 30,
 		},
 		{
-			Name:             "first example",
-			Input:            "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
-			ExpectedDistance: 159,
-			ExpectedSteps:    610,
+			name:  "first example",
+			input: "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
+			dist:  159,
+			steps: 610,
 		},
 		{
-			Name:             "second example",
-			Input:            "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
-			ExpectedDistance: 135,
-			ExpectedSteps:    410,
+			name:  "second example",
+			input: "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+			dist:  135,
+			steps: 410,
 		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			paths, err := Parse(strings.NewReader(tc.Input))
+		t.Run(tc.name, func(t *testing.T) {
+			paths, err := Parse(strings.NewReader(tc.input))
 			if err != nil {
 				t.Errorf("Parse() error: %s", err)
 			}
 			if len(paths) != 2 {
-				t.Errorf("got %d wires; expected 2", len(paths))
+				t.Errorf("got %d wires; want 2", len(paths))
 			}
 			fst := NewWire(paths[0])
 			snd := NewWire(paths[1])
 			md, ms := Connect(fst, snd)
-			if md != tc.ExpectedDistance {
-				t.Errorf("distance = %d; expected %d", md, tc.ExpectedDistance)
+			if md != tc.dist {
+				t.Errorf("distance = %d; want %d", md, tc.dist)
 			}
-			if ms != tc.ExpectedSteps {
-				t.Errorf("steps = %d; expected %d", ms, tc.ExpectedSteps)
+			if ms != tc.steps {
+				t.Errorf("steps = %d; want %d", ms, tc.steps)
 			}
 		})
 	}

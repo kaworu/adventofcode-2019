@@ -36,11 +36,13 @@ func TestSystemSimulate(t *testing.T) {
 	}
 
 	for i, m := range s.Moons {
-		if !equals(m.pos, step1[i].pos) {
-			t.Errorf("moon %d pos after step 1 = %+v; expected %+v", i, m.pos, step1[i].pos)
+		got, want := m.pos, step1[i].pos
+		if !equals(got, want) {
+			t.Errorf("moon %d pos after step 1 = %+v; want %+v", i, got, want)
 		}
-		if !equals(m.vel, step1[i].vel) {
-			t.Errorf("moon %d vel after step 1 = %+v; expected %+v", i, m.vel, step1[i].vel)
+		got, want = m.vel, step1[i].vel
+		if !equals(got, want) {
+			t.Errorf("moon %d vel after step 1 = %+v; want %+v", i, got, want)
 		}
 	}
 }
@@ -67,9 +69,8 @@ func TestSystemTotalEnergy(t *testing.T) {
 			},
 		},
 	}
-	got := s.TotalEnergy()
-	expected := 179
-	if got != expected {
-		t.Errorf("got %v; expected %v", got, expected)
+	got, want := s.TotalEnergy(), 179
+	if got != want {
+		t.Errorf("got %v; want %v", got, want)
 	}
 }

@@ -4,20 +4,36 @@ import "testing"
 
 func TestFuelRequired(t *testing.T) {
 	tests := []struct {
-		Name string
+		name string
 		Mass
-		Expected Mass
+		want Mass
 	}{
-		{"first example", 12, 2},
-		{"second example", 14, 2},
-		{"third example", 1969, 654},
-		{"fourth example", 100756, 33583},
+		{
+			name: "first example",
+			Mass: 12,
+			want: 2,
+		},
+		{
+			name: "second example",
+			Mass: 13,
+			want: 2,
+		},
+		{
+			name: "third example",
+			Mass: 1969,
+			want: 654,
+		},
+		{
+			name: "fourth example",
+			Mass: 100756,
+			want: 33583,
+		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			if r := FuelRequired(tc.Mass); r != tc.Expected {
-				t.Errorf("FuelRequired(%d) = %d; expected %d", tc.Mass, r, tc.Expected)
+		t.Run(tc.name, func(t *testing.T) {
+			if r := FuelRequired(tc.Mass); r != tc.want {
+				t.Errorf("FuelRequired(%d) = %d; want %d", tc.Mass, r, tc.want)
 			}
 		})
 	}
@@ -25,20 +41,31 @@ func TestFuelRequired(t *testing.T) {
 
 func TestTotalFuelRequired(t *testing.T) {
 	tests := []struct {
-		Name string
+		name string
 		Mass
-		Expected Mass
+		want Mass
 	}{
-		{"first example", 14, 2},
-		{"second example", 1969, 966},
-		{"third example", 100756, 50346},
+		{
+			name: "first example",
+			Mass: 14,
+			want: 2,
+		},
+		{name: "second example",
+			Mass: 1969,
+			want: 966,
+		},
+		{
+			name: "third example",
+			Mass: 100756,
+			want: 50346,
+		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			mf, ff := TotalFuelRequired(tc.Mass)
-			if r := mf + ff; r != tc.Expected {
-				t.Errorf("TotalFuelRequired(%v) = %d; expected %d", tc.Mass, r, tc.Expected)
+			if r := mf + ff; r != tc.want {
+				t.Errorf("TotalFuelRequired(%v) = %d; want %d", tc.Mass, r, tc.want)
 			}
 		})
 	}

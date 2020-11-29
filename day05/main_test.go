@@ -4,28 +4,28 @@ import "testing"
 
 func TestInputOutput(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Program  Memory
-		Input    Input
-		Expected Output
+		name   string
+		prog   Memory
+		input  Input
+		output Output
 	}{
 		{
-			Name:     "identity program",
-			Program:  Memory{3, 0, 4, 0, 99},
-			Input:    Input{42},
-			Expected: Output{42},
+			name:   "identity program",
+			prog:   Memory{3, 0, 4, 0, 99},
+			input:  Input{42},
+			output: Output{42},
 		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			mem := tc.Program.Copy()
-			output, err := mem.Execute(tc.Input)
+		t.Run(tc.name, func(t *testing.T) {
+			mem := tc.prog.Copy()
+			output, err := mem.Execute(tc.input)
 			switch {
 			case err != nil:
-				t.Errorf("%v.Execute(%v) error", tc.Program, tc.Input)
-			case !IntcodeEqual(output, tc.Expected):
-				t.Errorf("%v.Execute(%v) = %v; expected %v", tc.Program, tc.Input, output, tc.Expected)
+				t.Errorf("%v.Execute(%v) error", tc.prog, tc.input)
+			case !IntcodeEqual(output, tc.output):
+				t.Errorf("%v.Execute(%v) = %v; want %v", tc.prog, tc.input, output, tc.output)
 			}
 		})
 	}
@@ -33,31 +33,31 @@ func TestInputOutput(t *testing.T) {
 
 func TestModes(t *testing.T) {
 	tests := []struct {
-		Name       string
-		Program    Memory
-		FinalState Memory
+		name string
+		prog Memory
+		want Memory
 	}{
 		{
-			Name:       "multiply then halt",
-			Program:    Memory{1002, 4, 3, 4, 33},
-			FinalState: Memory{1002, 4, 3, 4, 99},
+			name: "multiply then halt",
+			prog: Memory{1002, 4, 3, 4, 33},
+			want: Memory{1002, 4, 3, 4, 99},
 		},
 		{
-			Name:       "add immediate with negative value",
-			Program:    Memory{1101, 100, -1, 4, 0},
-			FinalState: Memory{1101, 100, -1, 4, 99},
+			name: "add immediate with negative value",
+			prog: Memory{1101, 100, -1, 4, 0},
+			want: Memory{1101, 100, -1, 4, 99},
 		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			mem := tc.Program.Copy()
+		t.Run(tc.name, func(t *testing.T) {
+			mem := tc.prog.Copy()
 			_, err := mem.Execute( /* Input */ nil)
 			switch {
 			case err != nil:
-				t.Errorf("%v.Execute() error", tc.Program)
-			case !IntcodeEqual(mem, tc.FinalState):
-				t.Errorf("%v.Execute() final state = %v; expected %v", tc.Program, mem, tc.FinalState)
+				t.Errorf("%v.Execute() error", tc.prog)
+			case !IntcodeEqual(mem, tc.want):
+				t.Errorf("%v.Execute() final state = %v; want %v", tc.prog, mem, tc.want)
 			}
 		})
 	}
@@ -77,45 +77,45 @@ func TestComparisons(t *testing.T) {
 		return Output{0}
 	}
 	tests := []struct {
-		Name    string
-		Program Memory
-		Execute func(in Input) Output
+		name string
+		prog Memory
+		exec func(in Input) Output
 	}{
 		{
-			Name:    "position mode input==8",
-			Program: Memory{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8},
-			Execute: eq8,
+			name: "position mode input==8",
+			prog: Memory{3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8},
+			exec: eq8,
 		},
 		{
-			Name:    "position mode input<8",
-			Program: Memory{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8},
-			Execute: lt8,
+			name: "position mode input<8",
+			prog: Memory{3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8},
+			exec: lt8,
 		},
 		{
-			Name:    "immediate mode input==8",
-			Program: Memory{3, 3, 1108, -1, 8, 3, 4, 3, 99},
-			Execute: eq8,
+			name: "immediate mode input==8",
+			prog: Memory{3, 3, 1108, -1, 8, 3, 4, 3, 99},
+			exec: eq8,
 		},
 		{
-			Name:    "immediate mode input<8",
-			Program: Memory{3, 3, 1107, -1, 8, 3, 4, 3, 99},
-			Execute: lt8,
+			name: "immediate mode input<8",
+			prog: Memory{3, 3, 1107, -1, 8, 3, 4, 3, 99},
+			exec: lt8,
 		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			for i := -10; i <= 10; i++ {
-				mem := tc.Program.Copy()
+				mem := tc.prog.Copy()
 				in := Input{Intcode(i)}
-				expected := tc.Execute(in)
+				want := tc.exec(in)
 				output, err := mem.Execute(in)
 				switch {
 				case err != nil:
-					t.Errorf("%v.Execute(%v) error: %s", tc.Program, in, err)
+					t.Errorf("%v.Execute(%v) error: %s", tc.prog, in, err)
 					return
-				case !IntcodeEqual(output, expected):
-					t.Errorf("%v.Execute(%v) = %v; expected %v", tc.Program, in, output, expected)
+				case !IntcodeEqual(output, want):
+					t.Errorf("%v.Execute(%v) = %v; want %v", tc.prog, in, output, want)
 					return
 				}
 			}

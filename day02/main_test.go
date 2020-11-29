@@ -4,65 +4,65 @@ import "testing"
 
 func TestExecute(t *testing.T) {
 	tests := []struct {
-		Name     string
-		Program  Memory
-		Expected Memory
+		name string
+		prog Memory
+		want Memory
 	}{
 		{
-			Name: "detailed example",
-			Program: Memory{
+			name: "detailed example",
+			prog: Memory{
 				1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50,
 			},
-			Expected: Memory{
+			want: Memory{
 				3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50,
 			},
 		},
 		{
-			Name: "first example",
-			Program: Memory{
+			name: "first example",
+			prog: Memory{
 				1, 0, 0, 0, 99,
 			},
-			Expected: Memory{
+			want: Memory{
 				2, 0, 0, 0, 99,
 			},
 		},
 		{
-			Name: "second example",
-			Program: Memory{
+			name: "second example",
+			prog: Memory{
 				2, 3, 0, 3, 99,
 			},
-			Expected: Memory{
+			want: Memory{
 				2, 3, 0, 6, 99,
 			},
 		},
 		{
-			Name: "third example",
-			Program: Memory{
+			name: "third example",
+			prog: Memory{
 				2, 4, 4, 5, 99, 0,
 			},
-			Expected: Memory{
+			want: Memory{
 				2, 4, 4, 5, 99, 9801,
 			},
 		},
 		{
-			Name: "fourth example",
-			Program: Memory{
+			name: "fourth example",
+			prog: Memory{
 				1, 1, 1, 4, 99, 5, 6, 0, 99,
 			},
-			Expected: Memory{
+			want: Memory{
 				30, 1, 1, 4, 2, 5, 6, 0, 99,
 			},
 		},
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.Name, func(t *testing.T) {
-			mem := tc.Program.Copy()
+		t.Run(tc.name, func(t *testing.T) {
+			mem := tc.prog.Copy()
 			if err := mem.Execute(); err != nil {
-				t.Errorf("%v.Execute() error: %s", tc.Program, err)
+				t.Fatalf("%v.Execute() error: %s", tc.prog, err)
 			}
-			if !Equal(mem, tc.Expected) {
-				t.Errorf("%v.Execute() = %v; expected %v", tc.Program, mem, tc.Expected)
+			if !Equal(mem, tc.want) {
+				t.Fatalf("%v.Execute() = %v; want %v", tc.prog, mem, tc.want)
 			}
 		})
 	}
