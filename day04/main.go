@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -187,7 +188,7 @@ func Parse(r io.Reader) (*Bounds, error) {
 	bounds := &Bounds{}
 	scanner := bufio.NewScanner(r)
 	if !scanner.Scan() {
-		return bounds, fmt.Errorf("empty input")
+		return bounds, errors.New("empty input")
 	}
 	line := scanner.Text()
 	if err := scanner.Err(); err != nil {

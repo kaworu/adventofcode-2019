@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -34,7 +35,7 @@ type Layer struct {
 func NewLayer(width int, height int, pixels []Pixel) (Layer, error) {
 	var l Layer
 	if width < 0 || height < 0 || len(pixels) != width*height {
-		return l, fmt.Errorf("wrong buffer dimensions")
+		return l, errors.New("wrong buffer dimensions")
 	}
 	l = Layer{width, height, pixels}
 	return l, nil
@@ -45,7 +46,7 @@ func NewLayer(width int, height int, pixels []Pixel) (Layer, error) {
 func Flatten(layers []Layer) (Layer, error) {
 	var flat Layer
 	if len(layers) == 0 {
-		return flat, fmt.Errorf("empty layer stack")
+		return flat, errors.New("empty layer stack")
 	}
 	// Create the flat image layer using the first layer's dimensions.
 	width, height := layers[0].width, layers[0].height
@@ -79,7 +80,7 @@ func MinLayerBy(all []Layer, f func(Layer) int) (Layer, error) {
 	var min Layer
 	var fmin int
 	if len(all) == 0 {
-		return min, fmt.Errorf("empty layer stack")
+		return min, errors.New("empty layer stack")
 	}
 	for i, l := range all {
 		if fl := f(l); i == 0 || fl < fmin {

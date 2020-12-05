@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -227,7 +228,7 @@ func (c *Computer) Execute(program []Intcode, in Input) (Output, error) {
 			c.pc += 2
 		case Read:
 			if len(in) == 0 {
-				return nil, fmt.Errorf("Read instruction: empty input")
+				return nil, errors.New("Read instruction: empty input")
 			}
 			_, err = c.store(m1, c.pc+1, in[0])
 			if err != nil {

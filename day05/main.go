@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -115,7 +116,7 @@ func (mem Memory) Execute(in Input) (Output, error) {
 			}
 		case Read:
 			if len(in) == 0 {
-				return nil, fmt.Errorf("Read instruction: empty input")
+				return nil, errors.New("Read instruction: empty input")
 			}
 			// NOTE: Read is always in position mode
 			dst := mem[pc+1]

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -128,7 +129,7 @@ func BestLocation(asteroids []Asteroid) (Asteroid, int, error) {
 	max := 0
 	loc := Asteroid{}
 	if len(asteroids) == 0 {
-		return loc, max, fmt.Errorf("empty slice argument")
+		return loc, max, errors.New("empty slice argument")
 	}
 	for i, a := range asteroids {
 		if n := a.Detect(asteroids); i == 0 || n > max {
