@@ -21,7 +21,7 @@ func (s *System) Simulate(steps int) {
 	}
 }
 
-// Total energy returns the total energy in the system.
+// TotalEnergy returns the total energy in the system.
 func (s *System) TotalEnergy() int {
 	energy := 0
 	for _, m := range s.Moons {

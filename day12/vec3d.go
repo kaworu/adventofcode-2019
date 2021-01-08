@@ -1,6 +1,6 @@
 package main
 
-// A 3-element vector represented by int x, y, z coordinates.
+// Vec3d is A 3-element vector represented by int x, y, z coordinates.
 type Vec3d struct {
 	x, y, z int
 }
