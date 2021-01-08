@@ -1,5 +1,5 @@
-![Check](https://github.com/kAworu/adventofcode-2019/workflows/Check/badge.svg)
-![Test](https://github.com/kAworu/adventofcode-2019/workflows/Test/badge.svg)
+![Check](https://github.com/kaworu/adventofcode-2019/workflows/Check/badge.svg)
+![Test](https://github.com/kaworu/adventofcode-2019/workflows/Test/badge.svg)
 
 # Advent of Code 2019
 
