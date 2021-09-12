@@ -207,7 +207,7 @@ func FeedbackLoop(apc Memory, seq []Intcode) Intcode {
 		i := i // capture i
 		go func() {
 			defer wg.Done()
-			amps[i].Execute() // FIXME: error are ignored
+			_ = amps[i].Execute() // FIXME: error are ignored
 		}()
 	}
 	wg.Wait()
@@ -262,7 +262,7 @@ func main() {
 
 // Parse an Intcode program.
 // It returns the parsed Intcode program's initial memory and any read or
-// convertion error encountered.
+// conversion error encountered.
 func Parse(r io.Reader) (Memory, error) {
 	var mem Memory
 	scanner := bufio.NewScanner(r)

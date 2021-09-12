@@ -16,10 +16,10 @@ func TestParse(t *testing.T) {
 `, "\n")
 
 	want := []Asteroid{
-		Asteroid{1, 0}, Asteroid{4, 0},
-		Asteroid{0, 2}, Asteroid{1, 2}, Asteroid{2, 2}, Asteroid{3, 2}, Asteroid{4, 2},
-		Asteroid{4, 3},
-		Asteroid{3, 4}, Asteroid{4, 4},
+		{1, 0}, {4, 0},
+		{0, 2}, {1, 2}, {2, 2}, {3, 2}, {4, 2},
+		{4, 3},
+		{3, 4}, {4, 4},
 	}
 
 	decoded, err := Parse(strings.NewReader(input))
@@ -190,17 +190,17 @@ func TestVaporize(t *testing.T) {
 `, "\n")
 	station := Asteroid{11, 13}
 	nth := map[int]Asteroid{
-		1:   Asteroid{11, 12},
-		2:   Asteroid{12, 1},
-		3:   Asteroid{12, 2},
-		10:  Asteroid{12, 8},
-		20:  Asteroid{16, 0},
-		50:  Asteroid{16, 9},
-		100: Asteroid{10, 16},
-		199: Asteroid{9, 6},
-		200: Asteroid{8, 2},
-		201: Asteroid{10, 9},
-		299: Asteroid{11, 1},
+		1:   {11, 12},
+		2:   {12, 1},
+		3:   {12, 2},
+		10:  {12, 8},
+		20:  {16, 0},
+		50:  {16, 9},
+		100: {10, 16},
+		199: {9, 6},
+		200: {8, 2},
+		201: {10, 9},
+		299: {11, 1},
 	}
 
 	asteroids, err := Parse(strings.NewReader(belt))

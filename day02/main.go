@@ -22,9 +22,9 @@ const (
 const (
 	// Output is the index of the program result in memory.
 	Output = 0
-	// Noun is the value placed in adress 1.
+	// Noun is the value placed in address 1.
 	Noun = 1
-	// Verb is the value placed in adress 2.
+	// Verb is the value placed in address 2.
 	Verb = 2
 )
 
@@ -115,7 +115,7 @@ func main() {
 
 // Parse an Intcode program.
 // It returns the parsed Intcode program's initial memory and any read or
-// convertion error encountered.
+// conversion error encountered.
 func Parse(r io.Reader) (Memory, error) {
 	var mem Memory
 	scanner := bufio.NewScanner(r)

@@ -15,13 +15,13 @@ func TestParse(t *testing.T) {
 			name:  "detailed example",
 			input: "R8,U5,L5,D3\nU7,R6,D4,L4",
 			want: []Path{
-				Path{
+				{
 					Step{Right, 8},
 					Step{Up, 5},
 					Step{Left, 5},
 					Step{Down, 3},
 				},
-				Path{
+				{
 					Step{Up, 7},
 					Step{Right, 6},
 					Step{Down, 4},
@@ -33,7 +33,7 @@ func TestParse(t *testing.T) {
 			name:  "first example",
 			input: "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83",
 			want: []Path{
-				Path{
+				{
 					Step{Right, 75},
 					Step{Down, 30},
 					Step{Right, 83},
@@ -44,7 +44,7 @@ func TestParse(t *testing.T) {
 					Step{Up, 7},
 					Step{Left, 72},
 				},
-				Path{
+				{
 					Step{Up, 62},
 					Step{Right, 66},
 					Step{Up, 55},
@@ -60,7 +60,7 @@ func TestParse(t *testing.T) {
 			name:  "second example",
 			input: "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
 			want: []Path{
-				Path{
+				{
 					Step{Right, 98},
 					Step{Up, 47},
 					Step{Right, 26},
@@ -73,7 +73,7 @@ func TestParse(t *testing.T) {
 					Step{Up, 53},
 					Step{Right, 51},
 				},
-				Path{
+				{
 					Step{Up, 98},
 					Step{Right, 91},
 					Step{Down, 20},
