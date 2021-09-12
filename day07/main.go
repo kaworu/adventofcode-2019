@@ -198,16 +198,20 @@ func FeedbackLoop(apc Memory, seq []Intcode) Intcode {
 	}
 	// Run each Amplifier in a goroutine and wait for all of them to halt.
 	// Note that part one require to setup the Amplifiers in series (not in a
-	// feedback loop). We blindly trust the Amplifier Controller Software to
-	// halt after receiving exactly one input (i.e. without looping) for part
-	// one (i.e. when the phase settings are between zero and four inclusive).
+	// feedback loop).
 	var wg sync.WaitGroup
 	wg.Add(n)
 	for i := range amps {
 		i := i // capture i
 		go func() {
 			defer wg.Done()
-			_ = amps[i].Execute() // FIXME: error are ignored
+			// Ignore potential errors from the Amplifier here. Note that we
+			// also blindly trust the Amplifier Controller Software to halt
+			// after receiving exactly one input (i.e. without looping) for
+			// part one (i.e. when the phase settings are between zero and four
+			// inclusive). We could use an errgroup here but I'm trying to only
+			// use stdlib.
+			_ = amps[i].Execute()
 		}()
 	}
 	wg.Wait()
