@@ -274,7 +274,7 @@ func main() {
 }
 
 // Parse an Intcode program.
-// It returns the parsed Intcode program and any read or convertion error
+// It returns the parsed Intcode program and any read or conversion error
 // encountered.
 func Parse(r io.Reader) ([]Intcode, error) {
 	var prog []Intcode

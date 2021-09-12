@@ -7,10 +7,10 @@ import (
 
 var encoded = "0222112222120000"
 var layers = []Layer{
-	Layer{2, 2, []Pixel{0, 2, 2, 2}},
-	Layer{2, 2, []Pixel{1, 1, 2, 2}},
-	Layer{2, 2, []Pixel{2, 2, 1, 2}},
-	Layer{2, 2, []Pixel{0, 0, 0, 0}},
+	{2, 2, []Pixel{0, 2, 2, 2}},
+	{2, 2, []Pixel{1, 1, 2, 2}},
+	{2, 2, []Pixel{2, 2, 1, 2}},
+	{2, 2, []Pixel{0, 0, 0, 0}},
 }
 
 func TestParse(t *testing.T) {

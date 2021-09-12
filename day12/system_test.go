@@ -51,19 +51,19 @@ func TestSystemTotalEnergy(t *testing.T) {
 	// the system from the first example at step 10.
 	s := &System{
 		Moons: []*Moon{
-			&Moon{
+			{
 				pos: Vec3d{x: 2, y: 1, z: -3},
 				vel: Vec3d{x: -3, y: -2, z: 1},
 			},
-			&Moon{
+			{
 				pos: Vec3d{x: 1, y: -8, z: 0},
 				vel: Vec3d{x: -1, y: 1, z: 3},
 			},
-			&Moon{
+			{
 				pos: Vec3d{x: 3, y: -6, z: 1},
 				vel: Vec3d{x: 3, y: 2, z: -3},
 			},
-			&Moon{
+			{
 				pos: Vec3d{x: 2, y: 0, z: 4},
 				vel: Vec3d{x: 1, y: -1, z: -1},
 			},

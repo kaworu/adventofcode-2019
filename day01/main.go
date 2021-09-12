@@ -48,7 +48,7 @@ func main() {
 }
 
 // Parse read the given input to produce a slice of Mass.
-// It returns the parsed collection of Mass and any read of convertion error
+// It returns the parsed collection of Mass and any read of conversion error
 // encountered.
 func Parse(r io.Reader) ([]Mass, error) {
 	var modules []Mass

@@ -165,7 +165,7 @@ func main() {
 
 // Parse an Intcode program.
 // It returns the parsed Intcode program's initial memory and any read or
-// convertion error encountered.
+// conversion error encountered.
 func Parse(r io.Reader) (Memory, error) {
 	var mem Memory
 	scanner := bufio.NewScanner(r)
