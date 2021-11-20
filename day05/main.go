@@ -38,7 +38,7 @@ const (
 	// Position mode where an Intcode is an address.
 	Position = 0
 	// Immediate mode where an Intcode is an immediate value.
-	Immediate = 1
+	Immediate = 1 //nolint:deadcode
 )
 
 // Intcode is a value in the computer's memory.
